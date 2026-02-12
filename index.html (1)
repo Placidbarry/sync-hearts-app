@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sync Hearts – Agent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .card {
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+        }
+        .avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 70px;
+            background: linear-gradient(145deg, #e6e9f0, #dce1e8);
+            margin: 8px auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.06);
+        }
+        .name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1e24;
+            margin-bottom: 4px;
+        }
+        .badge {
+            background: #f0f2f5;
+            color: #3a4b5c;
+            font-size: 15px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            display: inline-block;
+            margin: 8px 0 12px;
+        }
+        .bio {
+            color: #4a5c6b;
+            font-size: 18px;
+            line-height: 1.5;
+            margin: 16px 0 28px;
+            padding: 0 8px;
+        }
+        .private-note {
+            background: #fff4e5;
+            color: #7a5800;
+            padding: 12px;
+            border-radius: 16px;
+            font-size: 15px;
+            margin-bottom: 28px;
+            border: 1px solid #ffe0a3;
+        }
+        .pay-button {
+            background: #0088cc;
+            color: white;
+            border: none;
+            padding: 18px 24px;
+            border-radius: 60px;
+            font-size: 20px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 6px 14px rgba(0,136,204,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .pay-button:active {
+            background: #006699;
+            transform: scale(0.97);
+        }
+        .footer {
+            margin-top: 24px;
+            font-size: 14px;
+            color: #8a9aa8;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <!-- Worker avatar (you can replace the emoji with a real photo later) -->
+        <div class="avatar" id="avatar">👩‍💼</div>
+        
+        <!-- Worker name & age -->
+        <div class="name" id="name">Sophia, 26</div>
+        
+        <!-- Verification / trust badge -->
+        <div class="badge" id="badge">✓ Verified companion</div>
+        
+        <!-- Bio / description – this is what the user sees -->
+        <div class="bio" id="bio">
+            Friendly and professional. Here to make your day better. 
+            Speaks English & Spanish.
+        </div>
+        
+        <!-- Clear message: phone number is NOT shared -->
+        <div class="private-note">
+            🔒 Agent keeps phone number private. You'll chat directly here.
+        </div>
+        
+        <!-- The main action: payment & connection -->
+        <button class="pay-button" id="connectBtn">
+            💎 Pay & Connect
+        </button>
+        
+        <div class="footer">
+            Secure payment • Instant connection
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
