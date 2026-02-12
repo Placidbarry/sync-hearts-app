@@ -4,10 +4,10 @@ const sqlite3 = require('sqlite3').verbose();
 const { open } = require('sqlite');
 
 // ---------- CONFIG ----------
-const BOT_TOKEN = 'YOUR_BOT_TOKEN'; // 🔴 REPLACE WITH YOUR REAL TOKEN
-const WEBAPP_URL = 'https://placidbarry.github.io/Telegramm/'; // 🔴 YOUR GITHUB PAGES URL
-const WORKER_USERNAME = 'worker_username'; // 🔴 REPLACE WITH YOUR WORKER'S TELEGRAM @USERNAME
-const ADMIN_ID = 123456789; // 🔴 REPLACE WITH YOUR TELEGRAM USER ID
+const BOT_TOKEN = '8577711169:AAE8Av0ADtel8-4IbreUJe_08g-DenIhHXw'; // 🔴 REPLACE WITH YOUR REAL TOKEN
+const WEBAPP_URL = 'https://placidbarry.github.io/sync-hearts-app/'; // 🔴 YOUR GITHUB PAGES URL
+const WORKER_USERNAME = 'lisa'; // 🔴 REPLACE WITH YOUR WORKER'S TELEGRAM @USERNAME
+const ADMIN_ID = 7640605912; // 🔴 REPLACE WITH YOUR TELEGRAM USER ID
 
 // ---------- DATABASE ----------
 let db;
