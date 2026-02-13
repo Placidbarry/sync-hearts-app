@@ -1,202 +1,247 @@
-// ==========================================
-// VELVET CHAT - CLIENT SIDE LOGIC
-// ==========================================
-
+// ---------- Telegram Web App initialization ----------
 const tg = window.Telegram.WebApp;
-tg.expand(); // Make it full screen
-tg.enableClosingConfirmation(); // Ask before closing
+tg.expand();
+tg.ready();
+tg.enableClosingConfirmation();
 
-// ==========================================
-// 1. CUSTOMIZE YOUR PROFILES HERE
-// ==========================================
-// Tip: Use Imgur, Postimages, or Telegram file links for 'img'.
-// Since you are the only agent, all these profiles are just "masks" for you.
+// ---------- Global state ----------
+let userCredits = 0;
+let registrationData = {
+    age: '',
+    country: '',
+    state: '',
+    lookingFor: '',
+    photoFileId: ''
+};
 
-const femaleProfiles = [
-    { 
-        id: 'user_f1', 
-        name: 'Sarah', 
-        age: 23, 
-        dist: '1.2km', 
-        online: true,
-        img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500', 
-        bio: 'Bored at home 🏠. Want to chat with someone fun? I reply fast. 😉' 
-    },
-    { 
-        id: 'user_f2', 
-        name: 'Jessica', 
-        age: 25, 
-        dist: '3km', 
-        online: true,
-        img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500', 
-        bio: 'Love late night talks. Looking for a generous friend. 💎' 
-    },
-    { 
-        id: 'user_f3', 
-        name: 'Elena', 
-        age: 27, 
-        dist: '500m', 
-        online: false, // Will show as "Recently active"
-        img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500', 
-        bio: 'Just moved here! Looking for a tour guide... or just a good time.' 
-    },
-    { 
-        id: 'user_f4', 
-        name: 'Mia', 
-        age: 21, 
-        dist: '4.5km', 
-        online: true,
-        img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500', 
-        bio: 'Student. Stressing about exams. Distract me? 😈' 
-    }
+// ---------- Populate country dropdown ----------
+const countryList = [
+    "Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan",
+    "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia",
+    "Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi",
+    "Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia",
+    "Comoros","Congo","Costa Rica","Côte d'Ivoire","Croatia","Cuba","Cyprus","Czech Republic",
+    "Denmark","Djibouti","Dominica","Dominican Republic",
+    "Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia",
+    "Fiji","Finland","France",
+    "Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau",
+    "Guyana","Haiti","Honduras","Hungary",
+    "Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy",
+    "Jamaica","Japan","Jordan",
+    "Kazakhstan","Kenya","Kiribati","Korea, North","Korea, South","Kosovo","Kuwait","Kyrgyzstan",
+    "Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg",
+    "Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius",
+    "Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar",
+    "Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia",
+    "Norway","Oman",
+    "Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland",
+    "Portugal","Qatar",
+    "Romania","Russia","Rwanda",
+    "Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe",
+    "Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia",
+    "Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname",
+    "Sweden","Switzerland","Syria",
+    "Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago",
+    "Tunisia","Turkey","Turkmenistan","Tuvalu",
+    "Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
+    "Vanuatu","Vatican City","Venezuela","Vietnam",
+    "Yemen",
+    "Zambia","Zimbabwe"
 ];
 
-const maleProfiles = [
-    { 
-        id: 'user_m1', 
-        name: 'Alex', 
-        age: 26, 
-        dist: '2km', 
-        online: true,
-        img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500', 
-        bio: 'Gym rat by day, chatter by night. Hmu.' 
-    },
-    { 
-        id: 'user_m2', 
-        name: 'Daniel', 
-        age: 29, 
-        dist: '1km', 
-        online: true,
-        img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500', 
-        bio: 'Professional vibe checker. Lets skip the small talk.' 
-    }
-];
-
-// ==========================================
-// 2. STATE MANAGEMENT
-// ==========================================
-let userGender = '';
-let lookingFor = '';
-let currentProfileId = null;
-
-// ==========================================
-// 3. NAVIGATION FUNCTIONS
-// ==========================================
-
-function nextScreen(id) {
-    // Hide all screens
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    // Show target screen
-    document.getElementById(id).classList.add('active');
+function populateCountries() {
+    const select = document.getElementById('countrySelect');
+    if (!select) return;
+    select.innerHTML = '<option value="" disabled selected>Select your country</option>';
+    countryList.forEach(country => {
+        const option = document.createElement('option');
+        option.value = country;
+        option.textContent = country;
+        select.appendChild(option);
+    });
 }
+populateCountries();
 
-// Step 1: User picks their own gender
-function selectGender(gender) {
-    userGender = gender;
-    // Add a tiny vibration for realism
-    if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-    nextScreen('screen-looking');
-}
+// ---------- Looking for selection ----------
+const genderOptions = document.querySelectorAll('.gender-option');
+genderOptions.forEach(opt => {
+    opt.addEventListener('click', function () {
+        genderOptions.forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        registrationData.lookingFor = this.dataset.value;
+    });
+});
 
-// Step 2: User picks who they want to meet
-function startSearch(preference) {
-    lookingFor = preference;
-    if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-    
-    nextScreen('screen-radar');
-    
-    // Simulate a realistic "Scanning" process
-    const text = document.getElementById('radar-text');
-    
-    setTimeout(() => { text.innerText = "Triangulating location..."; }, 1200);
-    setTimeout(() => { text.innerText = "Filtering active users..."; }, 2400);
-    setTimeout(() => { 
-        renderFeed(); // Load the data
-        if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        nextScreen('screen-feed');
-    }, 4000);
-}
-
-// ==========================================
-// 4. FEED RENDERER (The "Tinder" List)
-// ==========================================
-
-function renderFeed() {
-    const list = document.getElementById('feed-list');
-    list.innerHTML = ''; // Clear previous
-
-    // Filter profiles based on user choice
-    let profilesToShow = [];
-    if (lookingFor === 'girls') profilesToShow = femaleProfiles;
-    else if (lookingFor === 'boys') profilesToShow = maleProfiles;
-    else profilesToShow = [...femaleProfiles, ...maleProfiles];
-
-    // Shuffle them so it looks fresh every time
-    profilesToShow.sort(() => 0.5 - Math.random());
-
-    profilesToShow.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'profile-item';
-        item.onclick = () => openProfile(p);
-        
-        // Check if online
-        const onlineBadge = p.online ? '<div class="online-dot"></div>' : '';
-
-        item.innerHTML = `
-            <div class="avatar-wrapper">
-                <img src="${p.img}" class="avatar">
-                ${onlineBadge}
-            </div>
-            <div class="profile-info">
-                <div class="name">${p.name}, ${p.age}</div>
-                <div class="preview">📍 ${p.dist} • Click to chat...</div>
-            </div>
-            <div class="action-icon">💬</div>
-        `;
-        list.appendChild(item);
+// ---------- Photo upload (Telegram native) ----------
+const uploadBtn = document.getElementById('uploadPhotoBtn');
+if (uploadBtn) {
+    uploadBtn.addEventListener('click', async function () {
+        tg.HapticFeedback.impactOccurred('light');
+        tg.openPhotoPicker({
+            max: 1,
+            success: (files) => {
+                if (files && files.length > 0) {
+                    const file = files[0];
+                    registrationData.photoFileId = file.fileId;
+                    document.getElementById('photoFileId').value = file.fileId;
+                    const previewDiv = document.getElementById('photoPreview');
+                    if (file.url) {
+                        previewDiv.innerHTML = `<img src="${file.url}" style="width:100%;height:100%;object-fit:cover;">`;
+                    } else {
+                        previewDiv.innerHTML = '<span>✅</span>';
+                    }
+                }
+            },
+            fail: (error) => {
+                tg.showAlert('Photo selection cancelled or failed.');
+            }
+        });
     });
 }
 
-// ==========================================
-// 5. PROFILE MODAL LOGIC
-// ==========================================
+// ---------- Complete registration ----------
+const registerBtn = document.getElementById('completeRegistrationBtn');
+if (registerBtn) {
+    registerBtn.addEventListener('click', function () {
+        const age = document.getElementById('ageInput')?.value;
+        if (!age || age < 18) {
+            tg.showAlert('Please enter a valid age (18+).');
+            return;
+        }
+        const country = document.getElementById('countrySelect')?.value;
+        if (!country) {
+            tg.showAlert('Please select your country.');
+            return;
+        }
+        const state = document.getElementById('stateInput')?.value.trim();
+        if (!state) {
+            tg.showAlert('Please enter your state/region.');
+            return;
+        }
+        if (!registrationData.lookingFor) {
+            tg.showAlert('Please select who you are looking for.');
+            return;
+        }
 
-function openProfile(profile) {
-    currentProfileId = profile.id; // Remember who they clicked
-    
-    // Populate the modal with the fake data
-    document.getElementById('modal-img').src = profile.img;
-    document.getElementById('modal-name').innerText = `${profile.name}, ${profile.age}`;
-    document.getElementById('modal-bio').innerText = profile.bio;
-    document.getElementById('modal-dist').innerText = profile.dist;
-    
-    document.getElementById('profile-modal').classList.add('open');
-    if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        registrationData.age = age;
+        registrationData.country = country;
+        registrationData.state = state;
+
+        tg.HapticFeedback.impactOccurred('medium');
+        tg.sendData(JSON.stringify({
+            action: 'register_client',
+            age: registrationData.age,
+            country: registrationData.country,
+            state: registrationData.state,
+            looking_for: registrationData.lookingFor,
+            photo_file_id: registrationData.photoFileId || '',
+            user_id: tg.initDataUnsafe?.user?.id,
+            username: tg.initDataUnsafe?.user?.username,
+            first_name: tg.initDataUnsafe?.user?.first_name
+        }));
+
+        tg.showAlert('✅ Registration sent! Loading companions...');
+        switchToAgentScreen();
+    });
 }
 
-function closeModal() {
-    document.getElementById('profile-modal').classList.remove('open');
+// ---------- Switch to agent browser ----------
+function switchToAgentScreen() {
+    document.getElementById('screenRegister')?.classList.add('hidden');
+    document.getElementById('screenAgents')?.classList.remove('hidden');
+    // request agent list from bot
+    tg.sendData(JSON.stringify({ action: 'get_agents' }));
 }
 
-// ==========================================
-// 6. THE "CONNECT" ACTION (The Money Maker)
-// ==========================================
+// ---------- Render agent grid (called from bot via window.updateAgents) ----------
+window.updateAgents = function (agentsArray) {
+    const container = document.getElementById('agentGridContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    agentsArray.forEach(agent => {
+        const card = document.createElement('div');
+        card.className = 'agent-card';
+        card.dataset.agentId = agent.id;
 
-document.getElementById('connect-btn').addEventListener('click', () => {
-    // 1. Vibration
-    if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
-    
-    // 2. Prepare data to send to Bot
-    // We send 'connect_request' so the bot knows to ask for payment/subscription
-    const data = {
-        action: 'connect_request',
-        target_id: currentProfileId, // e.g., 'user_f1'
-        user_gender: userGender
-    };
+        let photosHtml = `<div class="agent-photos">`;
+        agent.profilePics.slice(0, 2).forEach((pic, idx) => {
+            photosHtml += `<img src="${pic}" class="agent-thumb ${agent.profilePics.length > 1 ? 'small' : ''}" alt="profile">`;
+        });
+        photosHtml += `</div>`;
 
-    // 3. Send to Telegram
-    tg.sendData(JSON.stringify(data));
-    
-    // 4. Close the window (Bot takes over from here)
+        const lockHtml = agent.premiumPics > 0 ? `<div class="premium-lock">🔒${agent.premiumPics}</div>` : '';
+        const verifiedBadge = agent.verified ? '✓' : '';
+
+        card.innerHTML = `
+            ${lockHtml}
+            ${photosHtml}
+            <div class="agent-name">${agent.name}, ${agent.age} ${verifiedBadge}</div>
+            <div class="agent-meta">📍 ${agent.location}</div>
+            <div class="agent-bio">${agent.bio}</div>
+            <button class="chat-btn" data-agent-id="${agent.id}" data-agent-name="${agent.name}">
+                💬 Chat now
+            </button>
+        `;
+        container.appendChild(card);
+    });
+
+    // Attach chat events
+    document.querySelectorAll('.chat-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            requestChat(this.dataset.agentId, this.dataset.agentName);
+        });
+    });
+};
+
+// ---------- Request chat (pay 1 credit) ----------
+function requestChat(agentId, agentName) {
+    tg.HapticFeedback.impactOccurred('heavy');
+    tg.showConfirm(`💎 Start private chat with ${agentName}? (1 credit)`, (confirmed) => {
+        if (confirmed) {
+            tg.sendData(JSON.stringify({
+                action: 'request_chat',
+                agent_id: agentId,
+                agent_name: agentName,
+                client_id: tg.initDataUnsafe?.user?.id,
+                timestamp: Date.now()
+            }));
+            tg.showAlert('⏳ Searching for available agent... you will be notified.');
+            setTimeout(() => tg.close(), 1500);
+        }
+    });
+}
+
+// ---------- Update credit display (called from bot) ----------
+window.updateCredits = function (credits) {
+    userCredits = credits;
+    const creditEl = document.getElementById('creditDisplay');
+    if (creditEl) creditEl.innerHTML = `💎 ${credits} credits`;
+    const badge = document.querySelector('.credit-badge');
+    if (badge) badge.innerHTML = `💎 ${credits} credits`;
+};
+
+// ---------- Navigation ----------
+document.getElementById('navCredits')?.addEventListener('click', function () {
+    tg.HapticFeedback.impactOccurred('light');
+    tg.sendData(JSON.stringify({ action: 'buy_credits' }));
     tg.close();
 });
+document.getElementById('navProfile')?.addEventListener('click', function () {
+    tg.HapticFeedback.impactOccurred('light');
+    tg.sendData(JSON.stringify({ action: 'view_profile' }));
+    tg.close();
+});
+document.getElementById('navSupport')?.addEventListener('click', function () {
+    tg.HapticFeedback.impactOccurred('light');
+    tg.sendData(JSON.stringify({ action: 'support' }));
+    tg.close();
+});
+
+// ---------- If bot passes initial credits via initData (unsafe) ----------
+try {
+    const initData = tg.initDataUnsafe;
+    if (initData?.user?.credits) {
+        window.updateCredits(initData.user.credits);
+    }
+} catch (e) {}
