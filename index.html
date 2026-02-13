@@ -3,122 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Velvet Chat – Premium Connections</title>
+    <title>Velvet – Secret Connections</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0f0f13;
-            --card-bg: rgba(30, 30, 40, 0.7);
-            --primary: #ff3b5c; /* Hot Pink/Red */
-            --primary-glow: rgba(255, 59, 92, 0.4);
-            --accent: #7d2ae8; /* Deep Purple */
-            --text-main: #ffffff;
-            --text-sub: #a0a0b0;
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --online: #00ff88;
+            --primary: #ff3b30; /* Passion Red */
+            --accent: #ffcc00;  /* Gold */
+            --bg: #0f0f11;      /* Deep Black */
+            --card: #1c1c1e;    /* Dark Gray */
+            --text: #ffffff;
+            --glass: rgba(28, 28, 30, 0.95);
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
-            background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at 10% 20%, rgba(125, 42, 232, 0.2) 0%, transparent 40%),
-                              radial-gradient(circle at 90% 80%, rgba(255, 59, 92, 0.15) 0%, transparent 40%);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(circle at top right, #2a0a0a, #000000);
         }
 
-        /* --- UTILITIES --- */
-        .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- SCREEN 1: ONBOARDING --- */
-        .onboarding-container {
+        /* --- SCREEN CONTAINERS --- */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            padding: 24px;
-            text-align: center;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .screen.active {
+            opacity: 1;
+            pointer-events: all;
+            z-index: 10;
+            transform: scale(1);
+        }
+        .screen.hidden {
+            transform: scale(0.95);
         }
 
+        /* --- SCREEN 1: REGISTRATION --- */
         .logo {
             font-size: 32px;
-            font-weight: 800;
-            background: linear-gradient(45deg, #fff, var(--primary));
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--primary), #ff6b6b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             letter-spacing: -1px;
         }
-
         .tagline {
-            color: var(--text-sub);
-            font-size: 16px;
+            color: #8e8e93;
+            font-size: 15px;
             margin-bottom: 40px;
-            line-height: 1.5;
+            text-align: center;
         }
-
+        
+        .input-group {
+            width: 100%;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .label {
+            font-size: 13px;
+            color: #8e8e93;
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 500;
+        }
         .gender-select {
             display: flex;
-            gap: 16px;
-            width: 100%;
+            gap: 12px;
         }
-
         .gender-btn {
             flex: 1;
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            padding: 24px;
-            border-radius: 20px;
+            padding: 16px;
+            background: var(--card);
+            border: 1px solid #333;
+            border-radius: 16px;
+            color: #fff;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .gender-btn.selected {
+            background: rgba(255, 59, 48, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
-        .gender-btn:active { transform: scale(0.96); background: rgba(255,255,255,0.1); }
-        .gender-icon { font-size: 32px; display: block; margin-bottom: 8px; }
-        .gender-label { font-weight: 600; font-size: 16px; }
-
-        /* --- SCREEN 2: BROWSE AGENTS --- */
-        .app-header {
-            padding: 16px 20px;
+        /* --- SCREEN 2: RADAR --- */
+        .radar-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            background: rgba(15, 15, 19, 0.8);
-            backdrop-filter: blur(20px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 40px;
+        }
+        .radar-circle {
+            position: absolute;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            border-radius: 50%;
+            opacity: 0;
+            animation: pulse 2s infinite;
+        }
+        .c1 { width: 100%; height: 100%; animation-delay: 0s; }
+        .c2 { width: 75%; height: 75%; animation-delay: 0.5s; }
+        .c3 { width: 50%; height: 50%; animation-delay: 1s; }
+        
+        .user-dot {
+            width: 60px;
+            height: 60px;
+            background: var(--card);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(255, 59, 48, 0.4);
+        }
+        .status-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        .sub-status {
+            color: #8e8e93;
+            font-size: 14px;
+            margin-top: 8px;
         }
 
-        .vip-badge {
-            background: linear-gradient(90deg, #ffd700, #ffaa00);
-            color: #000;
-            padding: 6px 14px;
-            border-radius: 50px;
-            font-weight: 800;
+        /* --- SCREEN 3: MATCH FOUND --- */
+        .match-card {
+            background: var(--card);
+            width: 100%;
+            max-width: 340px;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            text-align: center;
+            position: relative;
+            border: 1px solid #333;
+        }
+        
+        /* The blurring effect to hide identity */
+        .photo-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            overflow: hidden;
+        }
+        .match-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Mild blur to suggest mystery/privacy */
+            filter: blur(8px) brightness(0.8); 
+            transition: filter 0.5s;
+        }
+        /* VIP Badge */
+        .match-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 12px;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            font-weight: 700;
+            color: var(--accent);
+            border: 1px solid rgba(255, 204, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .match-info {
+            padding: 24px;
+            position: relative;
+        }
+        .match-status-indicator {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4cd964;
+            color: #000;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(76, 217, 100, 0.3);
+        }
+
+        .match-title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .match-details {
+            color: #8e8e93;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        
+        .features-list {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .feature {
+            background: rgba(255,255,255,0.05);
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        /* --- BUTTONS --- */
+        .main-btn {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
+            box-shadow: 0 8px 24px rgba(255, 59, 48, 0.3);
+            transition: transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
         }
-
-        .grid-container {
+        .main-btn:active {
+            transform: scale(0.98);
+        }
+        .secondary-btn {
+            background: transparent;
+            color: #8e8e93;
+            border: none;
             padding: 16px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            padding-bottom: 100px;
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 500;
         }
 
+        @keyframes pulse {
+            0% { transform: scale(0.5); opacity: 1; border-width: 2px; }
+            100% { transform: scale(1.5); opacity: 0; border-width: 0px; }
+        }
+        
+        /* Privacy shield icon */
+        .shield-icon {
+            color: #4cd964;
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="screen-1" class="screen active">
+        <div class="logo">VELVET</div>
+        <div class="tagline">Anonymous. Discrete. Instant.</div>
+
+        <div class="input-group">
+            <label class="label">I AM A</label>
+            <div class="gender-select">
+                <div class="gender-btn selected" onclick="selectGender(this, 'male')">Man 👨</div>
+                <div class="gender-btn" onclick="selectGender(this, 'female')">Woman 👩</div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label class="label">LOOKING FOR</label>
+            <div class="gender-select">
+                <div class="gender-btn" onclick="selectInterest(this, 'male')">Man 👨</div>
+                <div class="gender-btn selected" onclick="selectInterest(this, 'female')">Woman 👩</div>
+            </div>
+        </div>
+        
+        <div style="flex: 1"></div>
+
+        <div style="text-align: center; margin-bottom: 20px; opacity: 0.6; font-size: 12px;">
+            <div class="shield-icon">🛡️</div>
+            100% Private & Anonymous<br>
+            No phone numbers shared.
+        </div>
+
+        <button class="main-btn" onclick="startScanning()">
+            START SEARCH
+        </button>
+    </div>
+
+    <div id="screen-2" class="screen">
+        <div class="radar-container">
+            <div class="radar-circle c1"></div>
+            <div class="radar-circle c2"></div>
+            <div class="radar-circle c3"></div>
+            <div class="user-dot">👤</div>
+        </div>
+        <div class="status-text" id="scan-status">Scanning nearby...</div>
+        <div class="sub-status" id="scan-sub">Searching for active users</div>
+    </div>
+
+    <div id="screen-3" class="screen">
+        <div class="match-card">
+            <div class="photo-container">
+                <div class="match-badge">👑 VIP ONLINE</div>
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop" class="match-photo" id="match-img">
+            </div>
+            
+            <div class="match-info">
+                <div class="match-status-indicator">● ONLINE NOW</div>
+                
+                <div class="match-title" id="match-name">Anonymous User</div>
+                <div class="match-details">📍 <span id="match-dist">1.2 km away</span> • Match: 98%</div>
+
+                <div class="features-list">
+                    <div class="feature">📸 Photos</div>
+                    <div class="feature">💬 Chat</div>
+                    <div class="feature">🎤 Voice</div>
+                </div>
+
+                <button class="main-btn" id="connect-btn">
+                    START SECRET CHAT
+                </button>
+            </div>
+        </div>
+        <button class="secondary-btn" onclick="location.reload()">Skip & Search Again</button>
+    </div>
+
+    <script>
+        // --- LOGIC ---
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+
+        // State
+        let myGender = 'male';
+        let lookingFor = 'female';
+        
+        // Agent Persona (Hidden identity, but consistent routing)
+        // We present this as "Anonymous" initially
+        const agent = {
+            id: 'worker_001',      // Matches your bot database
+            realName: 'Lisa',      // Internal name
+            displayName: 'Jessica', // Name shown if VIP, otherwise "Anonymous"
+            distance: '2.5 km',
+            age: 24
+        };
+
+        // --- UI FUNCTIONS ---
+
+        function selectGender(el, val) {
+            document.querySelectorAll('#screen-1 .input-group:nth-child(2) .gender-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            myGender = val;
+            tg.HapticFeedback.selectionChanged();
+        }
+
+        function selectInterest(el, val) {
+            document.querySelectorAll('#screen-1 .input-group:nth-child(3) .gender-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            lookingFor = val;
+            tg.HapticFeedback.selectionChanged();
+        }
+
+        function switchScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => {
+                s.classList.remove('active');
+                setTimeout(() => s.classList.add('hidden'), 400); // Wait for fade out
+            });
+            
+            const target = document.getElementById(id);
+            target.classList.remove('hidden');
+            // Small delay to allow display:block to apply before opacity
+            setTimeout(() => target.classList.add('active'), 50);
+        }
+
+        function startScanning() {
+            tg.HapticFeedback.impactOccurred('medium');
+            switchScreen('screen-2');
+
+            // Simulate scanning steps
+            const status = document.getElementById('scan-status');
+            const sub = document.getElementById('scan-sub');
+            
+            setTimeout(() => { status.innerText = "Users found: 14..."; tg.HapticFeedback.selectionChanged(); }, 1000);
+            setTimeout(() => { status.innerText = "Filtering active..."; sub.innerText = "Matching preferences"; tg.HapticFeedback.selectionChanged(); }, 2000);
+            setTimeout(() => { status.innerText = "Match found!"; tg.HapticFeedback.notificationOccurred('success'); }, 3000);
+            
+            setTimeout(() => {
+                showMatch();
+            }, 3500);
+        }
+
+        function showMatch() {
+            // Logic: Randomize the "Distance" slightly so it feels real
+            const dist = (Math.random() * 5 + 0.5).toFixed(1);
+            document.getElementById('match-dist').innerText = `${dist} km away`;
+            
+            // Set image based on preference (This is the trick - we always route to the SAME agent, 
+            // but we show a generic alluring image based on what they asked for)
+            const img = document.getElementById('match-img');
+            if(lookingFor === 'female') {
+                img.src = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=800&fit=crop"; // Redhead/Generic Female
+            } else {
+                img.src = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=800&fit=crop"; // Generic Male
+            }
+
+            switchScreen('screen-3');
+        }
+
+        // --- CONNECT BUTTON ACTION ---
+        document.getElementById('connect-btn').addEventListener('click', () => {
+            tg.HapticFeedback.impactOccurred('heavy');
+            
+            // Confirm Dialog
+            tg.showConfirm("Start private chat? 1 credit/message.", (confirm) => {
+                if(confirm) {
+                    // SEND DATA TO BOT
+                    const payload = {
+                        action: 'pay_connect',
+                        worker_id: agent.id, // Always routes to your 1 agent
+                        worker_name: "Anonymous", // Keep it mysterious in the chat title too initially? Or use 'Lisa'
+                        user_gender: myGender,
+                        target_gender: lookingFor
+                    };
+                    
+                    tg.sendData(JSON.stringify(payload));
+                    tg.close();
+                }
+            });
+        });
+
+        // Theme sync
+        if (tg.themeParams.bg_color) {
+            // We override standard theme to keep our "Dark Mode" aesthetic
+            // but we can respect font sizes if needed.
+        }
+    </script>
+</body>
+</html>
         .agent-card {
             background: var(--card-bg);
             border-radius: 16px;
