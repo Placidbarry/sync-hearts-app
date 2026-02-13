@@ -1,124 +1,428 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sync Hearts – Agent</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sync Hearts Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --primary: #FF4B6E; /* Dating App Red/Pink */
+            --primary-gradient: linear-gradient(135deg, #FF4B6E, #FF8E53);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            
+            /* Telegram Theme Variables Mapping */
+            --tg-bg: var(--tg-theme-bg-color, #ffffff);
+            --tg-text: var(--tg-theme-text-color, #222222);
+            --tg-hint: var(--tg-theme-hint-color, #888888);
+            --tg-secondary: var(--tg-theme-secondary-bg-color, #f5f5f5);
+        }
+
+        /* Dark Mode Overrides */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --glass-bg: rgba(30, 30, 30, 0.85);
+                --glass-border: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
-            margin: 0;
-            padding: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--tg-secondary);
+            color: var(--tg-text);
+            padding-bottom: 90px; /* Space for bottom nav */
+            overflow-x: hidden;
+        }
+
+        /* --- HEADER & COINS --- */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 12px 16px;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
+            border-bottom: 1px solid var(--glass-border);
         }
-        .card {
-            background: white;
-            border-radius: 28px;
-            padding: 24px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-            max-width: 420px;
-            width: 100%;
-            text-align: center;
-        }
-        .avatar {
-            width: 140px;
-            height: 140px;
-            border-radius: 70px;
-            background: linear-gradient(145deg, #e6e9f0, #dce1e8);
-            margin: 8px auto 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 64px;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.06);
-        }
-        .name {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1a1e24;
-            margin-bottom: 4px;
-        }
-        .badge {
-            background: #f0f2f5;
-            color: #3a4b5c;
-            font-size: 15px;
-            padding: 6px 16px;
-            border-radius: 50px;
-            display: inline-block;
-            margin: 8px 0 12px;
-        }
-        .bio {
-            color: #4a5c6b;
-            font-size: 18px;
-            line-height: 1.5;
-            margin: 16px 0 28px;
-            padding: 0 8px;
-        }
-        .private-note {
-            background: #fff4e5;
-            color: #7a5800;
-            padding: 12px;
-            border-radius: 16px;
-            font-size: 15px;
-            margin-bottom: 28px;
-            border: 1px solid #ffe0a3;
-        }
-        .pay-button {
-            background: #0088cc;
-            color: white;
-            border: none;
-            padding: 18px 24px;
-            border-radius: 60px;
+
+        .brand {
             font-size: 20px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .coin-pill {
+            background: var(--tg-bg);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid var(--glass-border);
+        }
+
+        .coin-icon { width: 16px; height: 16px; }
+
+        /* --- STORIES RAIL (ONLINE NOW) --- */
+        .section-title {
+            padding: 20px 16px 12px;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--tg-text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .see-all { color: var(--primary); font-size: 13px; font-weight: 500; }
+
+        .stories-rail {
+            display: flex;
+            gap: 16px;
+            padding: 0 16px 20px;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+        }
+        .stories-rail::-webkit-scrollbar { display: none; }
+
+        .story-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 64px;
+            gap: 6px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .story-ring {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            padding: 2px;
+            background: var(--primary-gradient);
+            position: relative;
+        }
+
+        .story-img {
             width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid var(--tg-bg);
+            object-fit: cover;
+            background: #ddd;
+        }
+
+        .online-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 14px;
+            height: 14px;
+            background: #1AD598;
+            border: 2px solid var(--tg-bg);
+            border-radius: 50%;
+        }
+
+        .story-name { font-size: 11px; font-weight: 500; color: var(--tg-text); }
+
+        /* --- PROFILE GRID --- */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 16px;
+        }
+
+        .card {
+            background: var(--tg-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            box-shadow: 0 6px 14px rgba(0,136,204,0.2);
+            height: 240px; /* Fixed height for uniformity */
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card:active { transform: scale(0.97); }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 40px 12px 12px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .card-name { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+        .card-age { opacity: 0.9; font-weight: 400; }
+        .card-bio { font-size: 11px; opacity: 0.8; margin-top: 4px; line-height: 1.3; }
+        
+        .verified-badge { width: 14px; height: 14px; }
+
+        .connect-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: white;
+            color: black;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        .pay-button:active {
-            background: #006699;
-            transform: scale(0.97);
+
+        /* --- VIP BANNER --- */
+        .vip-banner {
+            margin: 24px 16px;
+            background: linear-gradient(90deg, #222, #444);
+            border-radius: 16px;
+            padding: 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
         }
-        .footer {
-            margin-top: 24px;
-            font-size: 14px;
-            color: #8a9aa8;
+        
+        .vip-content z-index: 2;
+        .vip-title { font-weight: 700; font-size: 16px; margin-bottom: 2px; }
+        .vip-sub { font-size: 12px; opacity: 0.7; }
+        .vip-btn {
+            background: #FFD700;
+            color: black;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
         }
+
+        /* --- BOTTOM NAV --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 60px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid var(--glass-border);
+            z-index: 999;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--tg-hint);
+            font-size: 10px;
+            gap: 4px;
+            width: 50px;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 20px; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- LOADER --- */
+        .loader { text-align: center; padding: 20px; color: var(--tg-hint); font-size: 12px; }
+
     </style>
 </head>
 <body>
-    <div class="card">
-        <!-- Worker avatar (you can replace the emoji with a real photo later) -->
-        <div class="avatar" id="avatar">👩‍💼</div>
-        
-        <!-- Worker name & age -->
-        <div class="name" id="name">Sophia, 26</div>
-        
-        <!-- Verification / trust badge -->
-        <div class="badge" id="badge">✓ Verified companion</div>
-        
-        <!-- Bio / description – this is what the user sees -->
-        <div class="bio" id="bio">
-            Friendly and professional. Here to make your day better. 
-            Speaks English & Spanish.
+
+    <div class="header">
+        <div class="brand">Sync Hearts</div>
+        <div class="coin-pill">
+            <span>💎</span>
+            <span id="creditBalance">10</span>
         </div>
-        
-        <!-- Clear message: phone number is NOT shared -->
-        <div class="private-note">
-            🔒 Agent keeps phone number private. You'll chat directly here.
+    </div>
+
+    <div class="section-title">
+        <span>Online Now</span>
+        <span class="see-all">View All</span>
+    </div>
+    <div class="stories-rail" id="storiesRail">
         </div>
-        
-        <!-- The main action: payment & connection -->
+
+    <div class="vip-banner" onclick="handleBuyCredits()">
+        <div>
+            <div class="vip-title">Get VIP Status 👑</div>
+            <div class="vip-sub">See who likes you & unlimited chats</div>
+        </div>
+        <button class="vip-btn">UPGRADE</button>
+    </div>
+
+    <div class="section-title">
+        <span>Recommended</span>
+    </div>
+    <div class="grid" id="profilesGrid">
+        </div>
+
+    <div class="loader">
+        More profiles loading...
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active">
+            <span class="nav-icon">🔥</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-icon">❤️</span>
+        </div>
+        <div class="nav-item" onclick="handleBuyCredits()">
+            <span class="nav-icon">💎</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-icon">👤</span>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG & DATA ---
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+
+        // High Quality Unsplash Images
+        const db = [
+            { id: 'w1', name: 'Sophia', age: 24, bio: 'Coffee addict ☕️', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&h=700&fit=crop', online: true },
+            { id: 'w2', name: 'Elena', age: 27, bio: 'Travel & Art 🎨', img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&h=700&fit=crop', online: true },
+            { id: 'w3', name: 'Mia', age: 22, bio: 'Student @ NYU 📚', img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&h=700&fit=crop', online: false },
+            { id: 'w4', name: 'Isabella', age: 25, bio: 'Fitness coach 💪', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&h=700&fit=crop', online: true },
+            { id: 'w5', name: 'Camila', age: 23, bio: 'Let’s chat! 💬', img: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500&h=700&fit=crop', online: false },
+            { id: 'w6', name: 'Luna', age: 26, bio: 'Dog mom 🐶', img: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=500&h=700&fit=crop', online: true },
+        ];
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderStories() {
+            const rail = document.getElementById('storiesRail');
+            const onlineUsers = db.filter(u => u.online);
+            
+            rail.innerHTML = onlineUsers.map(u => `
+                <div class="story-item" onclick="handleConnect('${u.id}')">
+                    <div class="story-ring">
+                        <img src="${u.img}" class="story-img">
+                        <div class="online-dot"></div>
+                    </div>
+                    <div class="story-name">${u.name}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('profilesGrid');
+            
+            grid.innerHTML = db.map((u, index) => `
+                <div class="card" style="animation-delay: ${index * 0.1}s" onclick="handleConnect('${u.id}')">
+                    <img src="${u.img}" class="card-img" loading="lazy">
+                    <div class="card-overlay">
+                        <div class="card-name">
+                            ${u.name}, ${u.age} 
+                            <span style="color:#1AD598">✓</span>
+                        </div>
+                        <div class="card-bio">${u.bio}</div>
+                    </div>
+                    <button class="connect-btn">💬</button>
+                </div>
+            `).join('');
+        }
+
+        // --- INTERACTION LOGIC ---
+
+        function handleConnect(workerId) {
+            tg.HapticFeedback.impactOccurred('medium');
+            const worker = db.find(w => w.id === workerId);
+            
+            if (!worker) return;
+
+            tg.showConfirm(
+                `Start private chat with ${worker.name}? \nCost: 1 Diamond 💎`,
+                (confirm) => {
+                    if (confirm) {
+                        // Send data to Bot
+                        const data = {
+                            action: 'pay_connect',
+                            worker_id: worker.id,
+                            worker_name: worker.name,
+                            timestamp: Date.now()
+                        };
+                        tg.sendData(JSON.stringify(data));
+                        
+                        // Optimistic UI Update
+                        tg.close();
+                    }
+                }
+            );
+        }
+
+        function handleBuyCredits() {
+            tg.HapticFeedback.notificationOccurred('success');
+            // You can instruct the bot to open an invoice via web_app_data if needed, 
+            // or just close and let the bot handle the /buy command from the main menu.
+            tg.close(); 
+        }
+
+        // --- INIT ---
+        // Apply Telegram theme params to body background if available
+        if (tg.themeParams && tg.themeParams.bg_color) {
+            document.body.style.backgroundColor = tg.themeParams.secondary_bg_color;
+        }
+
+        renderStories();
+        renderGrid();
+
+    </script>
+</body>
+</html>        <!-- The main action: payment & connection -->
         <button class="pay-button" id="connectBtn">
             💎 Pay & Connect
         </button>
