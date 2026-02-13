@@ -1,247 +1,260 @@
-// ---------- Telegram Web App initialization ----------
+// ==========================================
+// 1. INITIALIZATION & CONFIG
+// ==========================================
 const tg = window.Telegram.WebApp;
-tg.expand();
-tg.ready();
-tg.enableClosingConfirmation();
 
-// ---------- Global state ----------
-let userCredits = 0;
-let registrationData = {
-    age: '',
-    country: '',
-    state: '',
-    lookingFor: '',
-    photoFileId: ''
+// Expand to full height
+tg.expand();
+
+// Set header color to match the dark theme
+tg.setHeaderColor('#0f1115'); 
+tg.setBackgroundColor('#0f1115');
+
+// Main State Object
+const state = {
+    user: {
+        age: null,
+        country: null,
+        city: null,
+        lookingFor: null,
+        photo: null // Will store base64 preview
+    },
+    credits: 0,
+    currentScreen: 'register'
 };
 
-// ---------- Populate country dropdown ----------
-const countryList = [
-    "Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan",
-    "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia",
-    "Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi",
-    "Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia",
-    "Comoros","Congo","Costa Rica","Côte d'Ivoire","Croatia","Cuba","Cyprus","Czech Republic",
-    "Denmark","Djibouti","Dominica","Dominican Republic",
-    "Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia",
-    "Fiji","Finland","France",
-    "Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau",
-    "Guyana","Haiti","Honduras","Hungary",
-    "Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy",
-    "Jamaica","Japan","Jordan",
-    "Kazakhstan","Kenya","Kiribati","Korea, North","Korea, South","Kosovo","Kuwait","Kyrgyzstan",
-    "Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg",
-    "Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius",
-    "Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar",
-    "Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia",
-    "Norway","Oman",
-    "Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland",
-    "Portugal","Qatar",
-    "Romania","Russia","Rwanda",
-    "Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe",
-    "Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia",
-    "Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname",
-    "Sweden","Switzerland","Syria",
-    "Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago",
-    "Tunisia","Turkey","Turkmenistan","Tuvalu",
-    "Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
-    "Vanuatu","Vatican City","Venezuela","Vietnam",
-    "Yemen",
-    "Zambia","Zimbabwe"
+// ==========================================
+// 2. MOCK DATA (The "Agency" Database)
+// ==========================================
+const COUNTRIES = ["USA", "UK", "Canada", "Australia", "Germany", "France", "Nigeria", "India", "Brazil", "UAE"];
+
+const AGENTS = [
+    {
+        id: 101,
+        name: "Sarah, 24",
+        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        status: "Online",
+        distance: "2 km away",
+        isPremium: true
+    },
+    {
+        id: 102,
+        name: "Chloe, 22",
+        image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        status: "Online",
+        distance: "5 km away",
+        isPremium: true
+    },
+    {
+        id: 103,
+        name: "Jessica, 26",
+        image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        status: "Busy",
+        distance: "12 km away",
+        isPremium: true
+    },
+    {
+        id: 104,
+        name: "Emily, 23",
+        image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        status: "Online",
+        distance: "Online now",
+        isPremium: true
+    }
 ];
 
-function populateCountries() {
-    const select = document.getElementById('countrySelect');
-    if (!select) return;
-    select.innerHTML = '<option value="" disabled selected>Select your country</option>';
-    countryList.forEach(country => {
-        const option = document.createElement('option');
-        option.value = country;
-        option.textContent = country;
-        select.appendChild(option);
-    });
-}
-populateCountries();
+// ==========================================
+// 3. DOM ELEMENTS
+// ==========================================
+const screens = {
+    register: document.getElementById('screen-register'),
+    loading: document.getElementById('screen-loading'),
+    agents: document.getElementById('screen-agents')
+};
 
-// ---------- Looking for selection ----------
-const genderOptions = document.querySelectorAll('.gender-option');
-genderOptions.forEach(opt => {
-    opt.addEventListener('click', function () {
-        genderOptions.forEach(o => o.classList.remove('selected'));
-        this.classList.add('selected');
-        registrationData.lookingFor = this.dataset.value;
+const inputs = {
+    age: document.getElementById('reg-age'),
+    country: document.getElementById('reg-country'),
+    state: document.getElementById('reg-state'),
+    lookingFor: document.getElementById('reg-looking-for'),
+    photoBtn: document.getElementById('upload-btn'),
+    photoPreview: document.getElementById('photo-preview'),
+    uploadText: document.getElementById('upload-text'),
+    btnComplete: document.getElementById('btn-complete-reg')
+};
+
+const nav = document.getElementById('main-nav');
+const agentGrid = document.getElementById('agent-grid');
+const creditDisplay = document.getElementById('credit-display');
+
+// ==========================================
+// 4. LOGIC & FUNCTIONS
+// ==========================================
+
+// --- Helper: Switch Screens ---
+function showScreen(screenName) {
+    Object.values(screens).forEach(el => el.classList.add('hidden'));
+    screens[screenName].classList.remove('hidden');
+    screens[screenName].classList.add('fade-in');
+    
+    // Show nav only on agent screen
+    if (screenName === 'agents') {
+        nav.classList.remove('hidden');
+        tg.MainButton.hide(); // Hide main button in browse mode
+    }
+}
+
+// --- Init: Populate Countries ---
+function init() {
+    COUNTRIES.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.innerText = c;
+        inputs.country.appendChild(opt);
     });
+
+    // Load saved credits if any (Mock)
+    // In real app, you'd fetch this from bot via URL params
+    updateCredits(0);
+}
+
+// --- Logic: Handle Photo Upload (Visual Only) ---
+inputs.photoBtn.addEventListener('click', () => {
+    // Create a hidden file input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (readerEvent) => {
+                // Show preview
+                state.user.photo = readerEvent.target.result;
+                inputs.photoPreview.src = state.user.photo;
+                inputs.photoPreview.style.display = 'block';
+                inputs.uploadText.innerText = "Change Photo";
+                
+                // Haptic feedback
+                tg.HapticFeedback.notificationOccurred('success');
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    
+    fileInput.click();
 });
 
-// ---------- Photo upload (Telegram native) ----------
-const uploadBtn = document.getElementById('uploadPhotoBtn');
-if (uploadBtn) {
-    uploadBtn.addEventListener('click', async function () {
-        tg.HapticFeedback.impactOccurred('light');
-        tg.openPhotoPicker({
-            max: 1,
-            success: (files) => {
-                if (files && files.length > 0) {
-                    const file = files[0];
-                    registrationData.photoFileId = file.fileId;
-                    document.getElementById('photoFileId').value = file.fileId;
-                    const previewDiv = document.getElementById('photoPreview');
-                    if (file.url) {
-                        previewDiv.innerHTML = `<img src="${file.url}" style="width:100%;height:100%;object-fit:cover;">`;
-                    } else {
-                        previewDiv.innerHTML = '<span>✅</span>';
-                    }
-                }
-            },
-            fail: (error) => {
-                tg.showAlert('Photo selection cancelled or failed.');
-            }
-        });
-    });
-}
+// --- Logic: Complete Registration ---
+inputs.btnComplete.addEventListener('click', () => {
+    // 1. Validate
+    const age = inputs.age.value;
+    const country = inputs.country.value;
+    const gender = inputs.lookingFor.value;
 
-// ---------- Complete registration ----------
-const registerBtn = document.getElementById('completeRegistrationBtn');
-if (registerBtn) {
-    registerBtn.addEventListener('click', function () {
-        const age = document.getElementById('ageInput')?.value;
-        if (!age || age < 18) {
-            tg.showAlert('Please enter a valid age (18+).');
-            return;
-        }
-        const country = document.getElementById('countrySelect')?.value;
-        if (!country) {
-            tg.showAlert('Please select your country.');
-            return;
-        }
-        const state = document.getElementById('stateInput')?.value.trim();
-        if (!state) {
-            tg.showAlert('Please enter your state/region.');
-            return;
-        }
-        if (!registrationData.lookingFor) {
-            tg.showAlert('Please select who you are looking for.');
-            return;
-        }
+    if (!age || !country || !gender) {
+        tg.showAlert("Please complete all fields to continue.");
+        tg.HapticFeedback.notificationOccurred('error');
+        return;
+    }
 
-        registrationData.age = age;
-        registrationData.country = country;
-        registrationData.state = state;
+    // 2. Save State
+    state.user.age = age;
+    state.user.country = country;
+    state.user.lookingFor = gender;
 
-        tg.HapticFeedback.impactOccurred('medium');
-        tg.sendData(JSON.stringify({
-            action: 'register_client',
-            age: registrationData.age,
-            country: registrationData.country,
-            state: registrationData.state,
-            looking_for: registrationData.lookingFor,
-            photo_file_id: registrationData.photoFileId || '',
-            user_id: tg.initDataUnsafe?.user?.id,
-            username: tg.initDataUnsafe?.user?.username,
-            first_name: tg.initDataUnsafe?.user?.first_name
-        }));
+    // 3. Transition: Show Radar
+    tg.HapticFeedback.impactOccurred('heavy');
+    showScreen('loading');
 
-        tg.showAlert('✅ Registration sent! Loading companions...');
-        switchToAgentScreen();
-    });
-}
+    // 4. Simulate "Finding Agents" (3 seconds)
+    setTimeout(() => {
+        renderAgents();
+        showScreen('agents');
+        tg.HapticFeedback.notificationOccurred('success');
+    }, 3000);
+});
 
-// ---------- Switch to agent browser ----------
-function switchToAgentScreen() {
-    document.getElementById('screenRegister')?.classList.add('hidden');
-    document.getElementById('screenAgents')?.classList.remove('hidden');
-    // request agent list from bot
-    tg.sendData(JSON.stringify({ action: 'get_agents' }));
-}
-
-// ---------- Render agent grid (called from bot via window.updateAgents) ----------
-window.updateAgents = function (agentsArray) {
-    const container = document.getElementById('agentGridContainer');
-    if (!container) return;
-    container.innerHTML = '';
-    agentsArray.forEach(agent => {
+// --- Logic: Render Agent Grid ---
+function renderAgents() {
+    agentGrid.innerHTML = '';
+    
+    AGENTS.forEach(agent => {
         const card = document.createElement('div');
         card.className = 'agent-card';
-        card.dataset.agentId = agent.id;
-
-        let photosHtml = `<div class="agent-photos">`;
-        agent.profilePics.slice(0, 2).forEach((pic, idx) => {
-            photosHtml += `<img src="${pic}" class="agent-thumb ${agent.profilePics.length > 1 ? 'small' : ''}" alt="profile">`;
-        });
-        photosHtml += `</div>`;
-
-        const lockHtml = agent.premiumPics > 0 ? `<div class="premium-lock">🔒${agent.premiumPics}</div>` : '';
-        const verifiedBadge = agent.verified ? '✓' : '';
+        card.onclick = () => handleAgentClick(agent);
 
         card.innerHTML = `
-            ${lockHtml}
-            ${photosHtml}
-            <div class="agent-name">${agent.name}, ${agent.age} ${verifiedBadge}</div>
-            <div class="agent-meta">📍 ${agent.location}</div>
-            <div class="agent-bio">${agent.bio}</div>
-            <button class="chat-btn" data-agent-id="${agent.id}" data-agent-name="${agent.name}">
-                💬 Chat now
-            </button>
+            <div class="agent-img-wrapper">
+                <img src="${agent.image}" class="agent-img" alt="${agent.name}">
+                ${agent.isPremium ? '<div class="premium-lock">🔒 VIP</div>' : ''}
+                <div class="agent-info">
+                    <div class="agent-name">${agent.name}</div>
+                    <div class="agent-status">
+                        <div class="dot"></div> ${agent.distance}
+                    </div>
+                </div>
+            </div>
         `;
-        container.appendChild(card);
-    });
-
-    // Attach chat events
-    document.querySelectorAll('.chat-btn').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            requestChat(this.dataset.agentId, this.dataset.agentName);
-        });
-    });
-};
-
-// ---------- Request chat (pay 1 credit) ----------
-function requestChat(agentId, agentName) {
-    tg.HapticFeedback.impactOccurred('heavy');
-    tg.showConfirm(`💎 Start private chat with ${agentName}? (1 credit)`, (confirmed) => {
-        if (confirmed) {
-            tg.sendData(JSON.stringify({
-                action: 'request_chat',
-                agent_id: agentId,
-                agent_name: agentName,
-                client_id: tg.initDataUnsafe?.user?.id,
-                timestamp: Date.now()
-            }));
-            tg.showAlert('⏳ Searching for available agent... you will be notified.');
-            setTimeout(() => tg.close(), 1500);
-        }
+        agentGrid.appendChild(card);
     });
 }
 
-// ---------- Update credit display (called from bot) ----------
-window.updateCredits = function (credits) {
-    userCredits = credits;
-    const creditEl = document.getElementById('creditDisplay');
-    if (creditEl) creditEl.innerHTML = `💎 ${credits} credits`;
-    const badge = document.querySelector('.credit-badge');
-    if (badge) badge.innerHTML = `💎 ${credits} credits`;
+// --- Interaction: Click Agent ---
+function handleAgentClick(agent) {
+    tg.HapticFeedback.selectionChanged();
+    
+    // Check credits
+    if (state.credits < 1) {
+        tg.showPopup({
+            title: `Connect with ${agent.name.split(',')[0]}?`,
+            message: "You need 1 Credit to start a private encrypted chat with this agent.",
+            buttons: [
+                {id: 'buy', type: 'default', text: '💎 Buy Credits'},
+                {id: 'cancel', type: 'destructive', text: 'Cancel'}
+            ]
+        }, (btnId) => {
+            if (btnId === 'buy') {
+                sendDataToBot('buy_credits');
+            }
+        });
+    } else {
+        // Has credits - Start Chat
+        tg.showConfirm(`Start private chat with ${agent.name}? This will use 1 Credit.`, (confirmed) => {
+            if (confirmed) {
+                sendDataToBot('connect_agent', { agentId: agent.id });
+            }
+        });
+    }
+}
+
+// --- Navigation Handling ---
+document.getElementById('nav-buy').onclick = () => {
+    tg.HapticFeedback.impactOccurred('medium');
+    sendDataToBot('buy_credits');
 };
 
-// ---------- Navigation ----------
-document.getElementById('navCredits')?.addEventListener('click', function () {
+document.getElementById('nav-support').onclick = () => {
     tg.HapticFeedback.impactOccurred('light');
-    tg.sendData(JSON.stringify({ action: 'buy_credits' }));
-    tg.close();
-});
-document.getElementById('navProfile')?.addEventListener('click', function () {
-    tg.HapticFeedback.impactOccurred('light');
-    tg.sendData(JSON.stringify({ action: 'view_profile' }));
-    tg.close();
-});
-document.getElementById('navSupport')?.addEventListener('click', function () {
-    tg.HapticFeedback.impactOccurred('light');
-    tg.sendData(JSON.stringify({ action: 'support' }));
-    tg.close();
-});
+    tg.openTelegramLink('https://t.me/YourSupportUsername'); // Replace with yours
+};
 
-// ---------- If bot passes initial credits via initData (unsafe) ----------
-try {
-    const initData = tg.initDataUnsafe;
-    if (initData?.user?.credits) {
-        window.updateCredits(initData.user.credits);
-    }
-} catch (e) {}
+// --- Helper: Send Data to Bot ---
+function sendDataToBot(action, payload = {}) {
+    const data = {
+        action: action,
+        user: state.user,
+        ...payload
+    };
+    tg.sendData(JSON.stringify(data));
+}
+
+// --- Helper: Update UI ---
+function updateCredits(amount) {
+    state.credits = amount;
+    creditDisplay.innerText = `💎 ${amount}`;
+}
+
+// Run Init
+init();
