@@ -3,674 +3,444 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Velvet Connection - VIP</title>
+    <title>Velvet Chat – Premium Connections</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f0f13;
-            --card-bg: #1a1a20;
-            --primary: #d4af37; /* Gold */
-            --primary-gradient: linear-gradient(135deg, #d4af37, #aa8e2d);
-            --accent: #ff2d55; /* Passion Red/Pink */
+            --bg-dark: #0f0f13;
+            --card-bg: rgba(30, 30, 40, 0.7);
+            --primary: #ff3b5c; /* Hot Pink/Red */
+            --primary-glow: rgba(255, 59, 92, 0.4);
+            --accent: #7d2ae8; /* Deep Purple */
             --text-main: #ffffff;
-            --text-sub: #8e8e93;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --text-sub: #a0a0b0;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --online: #00ff88;
         }
 
         body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 10% 20%, rgba(125, 42, 232, 0.2) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(255, 59, 92, 0.15) 0%, transparent 40%);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
+            min-height: 100vh;
             overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* --- UTILITIES --- */
         .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 0.4s ease-in; }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- ONBOARDING (Gender Select) --- */
-        #onboarding {
-            height: 100vh;
+        /* --- SCREEN 1: ONBOARDING --- */
+        .onboarding-container {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            background: radial-gradient(circle at center, #2a2a35 0%, #0f0f13 100%);
+            height: 100vh;
+            padding: 24px;
             text-align: center;
         }
 
-        .logo-area {
-            margin-bottom: 40px;
-        }
-        
-        .logo-icon {
-            font-size: 48px;
-            background: var(--primary-gradient);
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fff, var(--primary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
+            letter-spacing: -1px;
         }
 
-        .h1-premium {
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            margin: 0;
-            background: linear-gradient(to right, #fff, #aaa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
+        .tagline {
             color: var(--text-sub);
-            font-size: 14px;
-            margin-top: 8px;
+            font-size: 16px;
+            margin-bottom: 40px;
+            line-height: 1.5;
         }
 
-        .gender-options {
+        .gender-select {
             display: flex;
             gap: 16px;
             width: 100%;
-            max-width: 340px;
         }
 
-        .gender-card {
+        .gender-btn {
             flex: 1;
             background: var(--card-bg);
-            border: 1px solid var(--border);
+            border: 1px solid var(--glass-border);
+            padding: 24px;
             border-radius: 20px;
-            padding: 30px 10px;
             cursor: pointer;
             transition: all 0.2s;
+            backdrop-filter: blur(10px);
         }
 
-        .gender-card:active {
-            transform: scale(0.95);
-            border-color: var(--primary);
-        }
+        .gender-btn:active { transform: scale(0.96); background: rgba(255,255,255,0.1); }
+        .gender-icon { font-size: 32px; display: block; margin-bottom: 8px; }
+        .gender-label { font-weight: 600; font-size: 16px; }
 
-        .gender-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        /* --- MAIN APP INTERFACE --- */
-        #app-view {
-            padding-bottom: 80px; /* Space for nav */
-        }
-
-        /* Header */
-        .top-nav {
+        /* --- SCREEN 2: BROWSE AGENTS --- */
+        .app-header {
+            padding: 16px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 20px;
+            background: rgba(15, 15, 19, 0.8);
+            backdrop-filter: blur(20px);
             position: sticky;
             top: 0;
-            background: rgba(15, 15, 19, 0.95);
-            backdrop-filter: blur(10px);
             z-index: 100;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--glass-border);
         }
 
-        .coin-balance {
-            background: rgba(212, 175, 55, 0.15);
-            color: var(--primary);
+        .vip-badge {
+            background: linear-gradient(90deg, #ffd700, #ffaa00);
+            color: #000;
             padding: 6px 14px;
             border-radius: 50px;
-            font-weight: 700;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid rgba(212, 175, 55, 0.3);
+            font-weight: 800;
+            font-size: 12px;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            cursor: pointer;
         }
 
-        /* Story/Status Bar */
-        .stories-container {
-            padding: 10px 20px;
-            display: flex;
-            gap: 16px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .stories-container::-webkit-scrollbar { display: none; }
-
-        .story-circle {
-            width: 65px;
-            flex-shrink: 0;
-            text-align: center;
-        }
-
-        .story-ring {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            padding: 2px;
-            background: var(--primary-gradient);
-            position: relative;
-        }
-
-        .story-img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 3px solid var(--bg-color);
-            object-fit: cover;
-        }
-
-        .live-badge {
-            position: absolute;
-            bottom: -2px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ff0040;
-            color: white;
-            font-size: 9px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-            border: 2px solid var(--bg-color);
-        }
-
-        /* Main Grid */
-        .section-title {
-            padding: 20px 20px 10px;
-            font-size: 18px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .fire-icon { color: var(--accent); }
-
-        .profiles-grid {
+        .grid-container {
+            padding: 16px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            padding: 0 16px;
+            padding-bottom: 100px;
         }
 
-        .profile-card {
+        .agent-card {
             background: var(--card-bg);
             border-radius: 16px;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            aspect-ratio: 3/4;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
-        .card-image-container {
-            position: relative;
-            height: 200px;
-        }
-
-        .card-img {
+        .agent-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.3s;
         }
+        
+        .agent-card:active .agent-img { transform: scale(1.05); }
 
-        .blur-overlay {
+        .agent-overlay {
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 100%;
-            height: 40%;
+            right: 0;
             background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            z-index: 1;
+            padding: 12px;
+            padding-top: 40px;
         }
 
-        .card-info {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            z-index: 2;
-        }
-
-        .card-name {
-            font-weight: 700;
-            font-size: 16px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
-
-        .card-status {
-            font-size: 12px;
-            color: #4cd964;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .card-status::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: #4cd964;
-            border-radius: 50%;
-        }
-
-        /* Private Benefits Overlay (Locked content) */
-        .locked-content {
+        .agent-status {
             position: absolute;
             top: 10px;
-            right: 10px;
+            left: 10px;
             background: rgba(0,0,0,0.6);
             backdrop-filter: blur(4px);
             padding: 4px 8px;
-            border-radius: 8px;
-            font-size: 10px;
-            color: var(--primary);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-        }
-
-        /* --- BOTTOM NAVIGATION --- */
-        .bottom-bar {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: #16161a;
-            border-top: 1px solid var(--border);
+            border-radius: 12px;
             display: flex;
-            justify-content: space-around;
-            padding: 12px 0 24px; /* Extra padding for iOS home bar */
-            z-index: 200;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            font-size: 10px;
-            color: var(--text-sub);
             gap: 4px;
+            font-size: 10px;
+            font-weight: 600;
         }
 
-        .nav-item.active {
-            color: var(--primary);
-        }
-
-        .nav-icon {
-            font-size: 20px;
-        }
-
-        /* --- MODAL (Profile View) --- */
-        #profile-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-color);
-            z-index: 300;
-            overflow-y: auto;
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        #profile-modal.visible {
-            transform: translateY(0);
-        }
-
-        .modal-header-img {
-            width: 100%;
-            height: 400px;
-            object-fit: cover;
-            position: relative;
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--online);
             border-radius: 50%;
-            font-size: 18px;
-            z-index: 10;
-            cursor: pointer;
+            box-shadow: 0 0 5px var(--online);
         }
 
-        .modal-body {
+        .agent-name { font-weight: 700; font-size: 16px; }
+        .agent-info { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; gap: 4px; }
+
+        /* --- MODAL: PROFILE & ACTION --- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-end;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #1a1a20;
+            width: 100%;
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
             position: relative;
-            margin-top: -40px;
-            background: var(--bg-color);
-            border-radius: 30px 30px 0 0;
-            padding: 30px 20px 100px;
-            min-height: 50vh;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-top: 1px solid var(--glass-border);
         }
 
-        .modal-name {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 5px;
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .profile-large-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            margin-top: -60px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            background: #2a2a35;
         }
 
-        .modal-tags {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .tag {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: var(--text-sub);
-        }
-
-        .action-buttons {
-            display: flex;
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-top: 20px;
+            margin-top: 24px;
         }
 
-        .btn-main {
-            flex: 2;
-            background: var(--primary-gradient);
-            border: none;
+        .action-btn {
+            background: #252530;
+            border: 1px solid var(--glass-border);
+            color: white;
             padding: 16px;
             border-radius: 16px;
-            color: #000;
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-        }
-
-        .btn-gift {
-            flex: 1;
-            background: #2c2c35;
-            border: 1px solid var(--border);
-            color: #fff;
-            border-radius: 16px;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .private-gallery {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin-top: 30px;
-        }
-
-        .gallery-item {
-            aspect-ratio: 1;
-            border-radius: 10px;
-            overflow: hidden;
             position: relative;
         }
 
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: blur(15px); /* BLURRED CONTENT */
+        .action-btn.primary {
+            background: var(--primary);
+            grid-column: span 2;
+            font-size: 18px;
+            padding: 18px;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            border: none;
         }
 
-        .lock-overlay {
+        .locked-icon {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            color: var(--primary);
-        }
-
-        .verify-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(76, 217, 100, 0.1);
-            color: #4cd964;
-            padding: 4px 8px;
-            border-radius: 4px;
+            top: 8px;
+            right: 8px;
             font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 4px;
+            border-radius: 4px;
         }
 
+        /* --- TOAST NOTIFICATION --- */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 2000;
+        }
     </style>
 </head>
 <body>
 
-    <div id="onboarding">
-        <div class="logo-area">
-            <div class="logo-icon"><i class="fas fa-crown"></i></div>
-            <h1 class="h1-premium">VELVET</h1>
-            <div class="subtitle">Exclusive Connections & Companions</div>
-        </div>
-
-        <div style="margin-bottom: 20px; font-weight: 600;">I am a:</div>
+    <div id="onboardingScreen" class="onboarding-container fade-in">
+        <div class="logo">Velvet.</div>
+        <div class="tagline">Exclusive connections.<br>Select your preference to begin.</div>
         
-        <div class="gender-options">
-            <div class="gender-card" onclick="selectGender('male')">
+        <div class="gender-select">
+            <div class="gender-btn" onclick="selectGender('male')">
                 <span class="gender-icon">👨</span>
-                <div>Male</div>
+                <span class="gender-label">I'm a Guy</span>
             </div>
-            <div class="gender-card" onclick="selectGender('female')">
+            <div class="gender-btn" onclick="selectGender('female')">
                 <span class="gender-icon">👩</span>
-                <div>Female</div>
+                <span class="gender-label">I'm a Girl</span>
             </div>
         </div>
-        <p style="margin-top: 30px; font-size: 12px; color: #555;">By continuing, you agree to our 18+ VIP Terms.</p>
     </div>
 
-    <div id="app-view" class="hidden">
-        
-        <div class="top-nav">
-            <div style="font-weight: 800; font-size: 20px; letter-spacing: -0.5px;">
-                <i class="fas fa-crown" style="color: var(--primary);"></i> Velvet
-            </div>
-            <div class="coin-balance" onclick="tg.showAlert('Top up via /buy command!')">
-                <i class="fas fa-coins"></i> <span id="credit-display">0</span>
-            </div>
+    <div id="browseScreen" class="hidden">
+        <div class="app-header">
+            <div style="font-weight:800; font-size: 20px;">Velvet.</div>
+            <div class="vip-badge" onclick="showVipModal()">Get VIP 👑</div>
         </div>
 
-        <div class="stories-container">
-            <div class="story-circle">
-                <div class="story-ring">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop" class="story-img">
-                    <div class="live-badge">LIVE</div>
+        <div style="padding: 16px 16px 0; color: var(--text-sub); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">
+            Online Now • <span style="color: var(--online)">12 Active</span>
+        </div>
+
+        <div class="grid-container" id="agentsGrid">
+            </div>
+    </div>
+
+    <div id="profileModal" class="modal hidden" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <img id="modalImg" src="" class="profile-large-img">
+                <div style="background: rgba(0,255,136,0.1); color: var(--online); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 16px;">
+                    ● Online
                 </div>
-                <div style="font-size: 11px; margin-top: 4px;">Mia</div>
             </div>
-            </div>
-
-        <div class="section-title">
-            <span>Nearby Companions</span>
-            <i class="fas fa-fire fire-icon"></i>
-        </div>
-
-        <div class="profiles-grid" id="grid-container">
-            </div>
-
-    </div>
-
-    <div class="bottom-bar hidden" id="bottom-nav">
-        <div class="nav-item active">
-            <i class="fas fa-compass nav-icon"></i>
-            <span>Discover</span>
-        </div>
-        <div class="nav-item">
-            <i class="fas fa-heart nav-icon"></i>
-            <span>Matches</span>
-        </div>
-        <div class="nav-item" style="color: var(--primary);">
-            <i class="fas fa-gem nav-icon" style="font-size: 24px;"></i>
-            <span>VIP</span>
-        </div>
-        <div class="nav-item">
-            <i class="fas fa-comments nav-icon"></i>
-            <span>Chats</span>
-        </div>
-    </div>
-
-    <div id="profile-modal">
-        <button class="close-btn" onclick="closeModal()"><i class="fas fa-arrow-left"></i></button>
-        <img src="" id="modal-img" class="modal-header-img">
-        
-        <div class="modal-body">
-            <div class="verify-badge"><i class="fas fa-check-circle"></i> ID Verified Agent</div>
-            <div class="modal-name" id="modal-name">Name, Age</div>
-            <div style="color: #4cd964; margin-bottom: 12px; font-size: 14px;">● Online Now</div>
             
-            <div class="modal-tags">
-                <span class="tag">🇬🇧 English</span>
-                <span class="tag">📸 Photos</span>
-                <span class="tag">💬 Chat</span>
-            </div>
+            <h2 id="modalName" style="margin: 0; font-size: 24px;"></h2>
+            <p id="modalBio" style="color: var(--text-sub); margin: 8px 0 24px; font-size: 15px;"></p>
 
-            <p style="color: #ccc; line-height: 1.5; font-size: 15px;" id="modal-bio">
-                Looking for a good time? I'm fun, open-minded, and love to chat. Let's get to know each other better in private...
+            <div class="action-grid">
+                <button class="action-btn primary" id="connectBtn">
+                    💬 Start Private Chat
+                </button>
+                
+                <div class="action-btn" onclick="triggerLocked('Send Photo')">
+                    📷 Send Photo
+                    <span class="locked-icon">🔒 VIP</span>
+                </div>
+                <div class="action-btn" onclick="triggerLocked('Voice Note')">
+                    🎙️ Voice Note
+                    <span class="locked-icon">🔒 VIP</span>
+                </div>
+            </div>
+            
+            <p style="text-align: center; color: #555; font-size: 11px; margin-top: 24px;">
+                Strictly confidential. Chat is end-to-end encrypted.
             </p>
-
-            <div class="action-buttons">
-                <button class="btn-main" id="connect-btn">
-                    <i class="fas fa-comment-dots"></i> Private Chat
-                </button>
-                <button class="btn-gift">
-                    <i class="fas fa-gift"></i>
-                </button>
-            </div>
-
-            <div style="margin-top: 30px; font-weight: 700; display: flex; justify-content: space-between;">
-                <span>Private Gallery</span>
-                <span style="color: var(--primary); font-size: 14px;">🔒 Unlock VIP</span>
-            </div>
-
-            <div class="private-gallery">
-                <div class="gallery-item">
-                    <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=200" loading="lazy">
-                    <div class="lock-overlay"><i class="fas fa-lock"></i></div>
-                </div>
-                <div class="gallery-item">
-                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200" loading="lazy">
-                    <div class="lock-overlay"><i class="fas fa-lock"></i></div>
-                </div>
-                <div class="gallery-item">
-                    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200" loading="lazy">
-                    <div class="lock-overlay"><i class="fas fa-lock"></i></div>
-                </div>
-            </div>
         </div>
     </div>
+
+    <div id="toast" class="toast">Action locked</div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Fullscreen
+        tg.expand();
         tg.enableClosingConfirmation();
 
-        // Placeholder Data for Agents
+        // -- DATA --
+        // Use realistic Unsplash IDs for high-quality "Agent" look
         const agents = [
-            { id: 1, name: "Sophia", age: 23, img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop", bio: "Fun and flirty. Love late night chats.", online: true },
-            { id: 2, name: "Elena", age: 25, img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=500&fit=crop", bio: "Let me be your secret. 🤫", online: true },
-            { id: 3, name: "Ruby", age: 21, img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=500&fit=crop", bio: "Here to make you smile.", online: false },
-            { id: 4, name: "Jade", age: 24, img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=500&fit=crop", bio: "Adventures and fun times.", online: true },
-            { id: 5, name: "Sasha", age: 22, img: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=500&fit=crop", bio: "Waiting for you...", online: true },
-            { id: 6, name: "Nora", age: 26, img: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=500&fit=crop", bio: "Classy and sassy.", online: false },
+            { id: 1, name: "Sarah, 24", bio: "Loves late night talks and deep connections.", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&q=80" },
+            { id: 2, name: "Chloe, 22", bio: "Fun, flirty, and ready to chat.", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&q=80" },
+            { id: 3, name: "Jessica, 26", bio: "Your personal secret keeper.", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&q=80" },
+            { id: 4, name: "Maya, 23", bio: "Spontaneous and adventurous.", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80" },
+            { id: 5, name: "Elena, 25", bio: "Let's skip the small talk.", img: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500&q=80" },
+            { id: 6, name: "Ruby, 21", bio: "Here to make you smile.", img: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=500&q=80" }
         ];
 
-        let userCredits = 10; // Default
+        let selectedAgent = null;
 
-        // 1. Onboarding Logic
+        // -- LOGIC --
+
         function selectGender(gender) {
-            // Add vibration for premium feel
-            tg.HapticFeedback.impactOccurred('medium');
+            // Give feedback
+            tg.HapticFeedback.lightImpact();
             
-            document.getElementById('onboarding').classList.add('hidden');
-            document.getElementById('app-view').classList.remove('hidden');
-            document.getElementById('app-view').classList.add('fade-in');
-            document.getElementById('bottom-nav').classList.remove('hidden');
+            // Fade out onboarding, Fade in Browse
+            document.getElementById('onboardingScreen').style.display = 'none';
+            document.getElementById('browseScreen').classList.remove('hidden');
+            document.getElementById('browseScreen').classList.add('fade-in');
             
-            // Render grid
-            renderGrid();
+            renderAgents();
         }
 
-        // 2. Render Grid
-        function renderGrid() {
-            const container = document.getElementById('grid-container');
-            container.innerHTML = '';
-
+        function renderAgents() {
+            const grid = document.getElementById('agentsGrid');
+            grid.innerHTML = '';
+            
             agents.forEach(agent => {
                 const card = document.createElement('div');
-                card.className = 'profile-card';
+                card.className = 'agent-card';
                 card.onclick = () => openProfile(agent);
                 card.innerHTML = `
-                    <div class="card-image-container">
-                        <img src="${agent.img}" class="card-img" loading="lazy">
-                        <div class="blur-overlay"></div>
-                        <div class="locked-content"><i class="fas fa-camera"></i> 5</div>
+                    <img src="${agent.img}" class="agent-img" loading="lazy">
+                    <div class="agent-status">
+                        <div class="status-dot"></div> Online
                     </div>
-                    <div class="card-info">
-                        <div class="card-name">${agent.name}, ${agent.age}</div>
-                        <div class="card-status">${agent.online ? 'Online' : 'Away'}</div>
+                    <div class="agent-overlay">
+                        <div class="agent-name">${agent.name}</div>
+                        <div class="agent-info">📍 2km away</div>
                     </div>
                 `;
-                container.appendChild(card);
+                grid.appendChild(card);
             });
-            
-            // Update credits visual
-            document.getElementById('credit-display').innerText = userCredits;
         }
-
-        // 3. Modal Logic
-        let currentAgent = null;
 
         function openProfile(agent) {
-            currentAgent = agent;
+            selectedAgent = agent;
             tg.HapticFeedback.selectionChanged();
             
-            document.getElementById('modal-img').src = agent.img;
-            document.getElementById('modal-name').innerText = `${agent.name}, ${agent.age}`;
-            document.getElementById('modal-bio').innerText = agent.bio;
+            document.getElementById('modalImg').src = agent.img;
+            document.getElementById('modalName').innerText = agent.name;
+            document.getElementById('modalBio').innerText = agent.bio;
             
-            document.getElementById('profile-modal').classList.add('visible');
-            
-            // Setup Connect Button
-            const btn = document.getElementById('connect-btn');
-            btn.onclick = () => {
-                tg.HapticFeedback.impactOccurred('heavy');
-                tg.showConfirm(`Start Private Chat with ${agent.name}? Cost: 1 Credit`, (confirmed) => {
-                    if(confirmed) {
-                        // Send data back to Bot
-                        tg.sendData(JSON.stringify({
-                            action: 'connect',
-                            agent_id: agent.id,
-                            agent_name: agent.name
-                        }));
-                    }
-                });
-            };
+            document.getElementById('profileModal').classList.remove('hidden');
         }
 
-        function closeModal() {
-            document.getElementById('profile-modal').classList.remove('visible');
+        function closeModal(e) {
+            if (e.target.id === 'profileModal') {
+                document.getElementById('profileModal').classList.add('hidden');
+            }
         }
 
+        // CONNECT BUTTON (Sends data back to Bot)
+        document.getElementById('connectBtn').addEventListener('click', () => {
+            if(!selectedAgent) return;
+            
+            tg.HapticFeedback.impactOccurred('heavy');
+            
+            // Send data to Bot to start the chat
+            const data = JSON.stringify({
+                action: 'connect_agent',
+                agent_id: selectedAgent.id,
+                agent_name: selectedAgent.name
+            });
+            
+            tg.sendData(data);
+        });
+
+        // LOCKED FEATURES (Upsell)
+        function triggerLocked(feature) {
+            tg.HapticFeedback.notificationOccurred('error');
+            showToast(`⚠️ ${feature} is a VIP feature. Upgrade to unlock!`);
+            
+            // Optional: You could redirect to a payment flow here
+            // tg.sendData(JSON.stringify({ action: 'buy_vip' }));
+        }
+
+        function showVipModal() {
+             // In a real app, this would open a payment modal or send 'buy_vip' action to bot
+             tg.HapticFeedback.lightImpact();
+             tg.sendData(JSON.stringify({ action: 'open_vip_menu' }));
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 3000);
+        }
     </script>
 </body>
 </html>
