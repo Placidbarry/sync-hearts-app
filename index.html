@@ -5,23 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Velvet Agency</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d0d0d;
-            --card-bg: #1a1a1a;
-            --primary: #ff3b30; /* Desire Red */
-            --accent: #8e44ad;  /* Luxury Purple */
+            --primary: #ff0055; /* Neon Pink */
+            --bg: #121212;
+            --card: #1e1e1e;
             --text: #ffffff;
-            --text-secondary: #888888;
+            --input-bg: #2a2a2a;
         }
-
+        
         body {
-            background-color: var(--bg-color);
+            margin: 0; padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
             color: var(--text);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
             overflow-x: hidden;
         }
 
@@ -30,190 +27,322 @@
             display: none;
             padding: 20px;
             min-height: 100vh;
-            flex-direction: column;
             animation: fadeIn 0.4s ease;
         }
-        .screen.active { display: flex; }
+        .screen.active { display: block; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-        p { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
-
-        /* --- FORMS --- */
-        .form-group { margin-bottom: 20px; }
-        label { display: block; color: var(--text-secondary); font-size: 12px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        /* --- TYPOGRAPHY & BUTTONS --- */
+        h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+        p { color: #888; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
         
-        input, select {
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid #333;
+        .btn {
+            background: linear-gradient(45deg, #ff0055, #ff4444);
             color: white;
+            border: none;
+            width: 100%;
             padding: 16px;
             border-radius: 12px;
             font-size: 16px;
+            font-weight: 700;
+            margin-top: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3);
+        }
+        .btn:active { transform: scale(0.98); }
+
+        /* --- FORMS --- */
+        .form-group { margin-bottom: 16px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-size: 12px; color: #aaa; font-weight: 600; text-transform: uppercase; }
+        input, select {
+            width: 100%;
+            padding: 14px;
+            background: var(--input-bg);
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
             outline: none;
-            transition: border 0.3s;
+            box-sizing: border-box; /* Fix padding issues */
         }
         input:focus { border-color: var(--primary); }
 
-        .location-row { display: flex; gap: 10px; }
-        .btn-detect {
-            background: #2a2a2a;
-            border: none;
-            color: white;
-            padding: 0 20px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        /* --- BUTTONS --- */
-        .btn-main {
-            background: linear-gradient(135deg, var(--primary), #d63031);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 18px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 600;
-            margin-top: auto;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);
-        }
-        .btn-main:active { transform: scale(0.98); }
-
-        /* --- GENDER SELECTION --- */
-        .gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .gender-option {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            border: 2px solid transparent;
-            cursor: pointer;
-        }
-        .gender-option.selected { border-color: var(--primary); background: #250a0a; }
-        .emoji { font-size: 32px; display: block; margin-bottom: 5px; }
-
-        /* --- MODEL GALLERY --- */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding-bottom: 80px;
-        }
+        /* --- MODEL CARDS --- */
         .model-card {
-            background: var(--card-bg);
-            border-radius: 15px;
+            background: var(--card);
+            border-radius: 20px;
             overflow: hidden;
+            margin-bottom: 20px;
             position: relative;
-            cursor: pointer;
             border: 1px solid #333;
         }
-        .model-card.selected { border: 2px solid var(--primary); }
-        
+        .model-img-container {
+            position: relative;
+            height: 350px;
+        }
         .model-img {
             width: 100%;
-            height: 180px;
+            height: 100%;
             object-fit: cover;
         }
-        .model-info {
-            padding: 10px;
-        }
-        .model-name { font-weight: 700; font-size: 14px; }
-        .model-status { 
-            font-size: 11px; 
-            color: #2ecc71; 
-            display: flex; 
-            align-items: center; 
-            gap: 4px;
-            margin-top: 4px; 
-        }
-        .status-dot { width: 6px; height: 6px; background: #2ecc71; border-radius: 50%; }
-
-        /* --- WAITING ROOM LOADER --- */
-        .loader-container {
+        .lock-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 60vh;
+            color: white;
         }
-        .pulse-ring {
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            border: 3px solid var(--primary);
-            animation: pulse 2s infinite;
+        .model-info {
+            padding: 20px;
         }
-        @keyframes pulse {
-            0% { transform: scale(0.5); opacity: 1; }
-            100% { transform: scale(2); opacity: 0; }
+        .model-name { font-size: 22px; font-weight: 700; }
+        .model-tags { display: flex; gap: 8px; margin-top: 8px; }
+        .tag { background: #333; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+
+        /* --- ADMIN DASHBOARD --- */
+        .admin-controls {
+            background: #222;
+            border: 1px solid #ff0055;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .edit-row {
+            display: flex; gap: 10px; margin-bottom: 10px;
         }
 
+        /* --- UTILS --- */
+        .hidden { display: none !important; }
+        .logo { font-size: 40px; text-align: center; margin: 40px 0 20px; }
+        .admin-trigger { position: fixed; bottom: 0; right: 0; width: 30px; height: 30px; opacity: 0; }
     </style>
 </head>
 <body>
 
     <div class="screen active" id="screen-register">
-        <h1>Private Access</h1>
-        <p>Register to unlock our exclusive network.</p>
+        <div class="logo">💋</div>
+        <h1 style="text-align:center">Private Access</h1>
+        <p style="text-align:center">Create your anonymous profile to view our models.</p>
 
         <div class="form-group">
-            <label>Display Name</label>
-            <input type="text" id="inp-name" placeholder="How should we call you?">
+            <label>Nickname</label>
+            <input type="text" id="reg-name" placeholder="How should we call you?">
         </div>
 
         <div class="form-group">
-            <label>Date of Birth</label>
-            <input type="date" id="inp-dob" style="color-scheme: dark;">
+            <label>Date of Birth (Age Check)</label>
+            <input type="date" id="reg-dob">
         </div>
 
         <div class="form-group">
-            <label>Location</label>
-            <div class="location-row">
-                <input type="text" id="inp-location" placeholder="City or Country">
-                <button class="btn-detect" id="btn-geo">📍</button>
-            </div>
+            <label>Country</label>
+            <select id="reg-country">
+                <option value="" disabled selected>Select your location</option>
+                <option value="US">United States</option>
+                <option value="UK">United Kingdom</option>
+                <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
+                <option value="NG">Nigeria</option>
+                <option value="IN">India</option>
+                <option value="Other">Other</option>
+            </select>
         </div>
 
         <div class="form-group">
-            <label>I am a...</label>
-            <div class="gender-grid">
-                <div class="gender-option" onclick="selectMyGender('Male', this)">
-                    <span class="emoji">👨</span> Man
-                </div>
-                <div class="gender-option" onclick="selectMyGender('Female', this)">
-                    <span class="emoji">👩</span> Woman
-                </div>
-            </div>
+            <label>Looking For</label>
+            <select id="reg-pref">
+                <option value="female">Ladies (Females)</option>
+                <option value="male">Guys (Males)</option>
+                <option value="trans">Trans / All</option>
+            </select>
         </div>
 
-        <button class="btn-main" onclick="goToStep2()">Continue</button>
+        <button class="btn" onclick="handleRegistration()">Continue & Get Credits</button>
+        <div class="admin-trigger" onclick="unlockAdmin()"></div>
     </div>
 
-    <div class="screen" id="screen-models">
-        <h1>Select Companion</h1>
-        <p>Who matches your mood tonight?</p>
-
-        <div class="gallery-grid" id="model-list">
-            </div>
-
-        <button class="btn-main" onclick="submitRegistration()">Request Session</button>
-    </div>
-
-    <div class="screen" id="screen-waiting">
-        <div class="loader-container">
-            <div class="pulse-ring"></div>
-            <h2 style="margin-top: 30px;">Notifying Agents...</h2>
-            <p>Please wait while we connect you to <span id="target-name">...</span></p>
+    <div class="screen" id="screen-browse">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h1>Available Now</h1>
+            <div style="background:#333; padding:5px 12px; border-radius:20px; font-size:13px;">💎 <span id="credit-display">1</span> Free</div>
         </div>
+
+        <div id="models-container">
+            </div>
     </div>
 
-    <script src="app.js"></script>
+    <div class="screen" id="screen-admin">
+        <h1>👨‍💻 Agency Dashboard</h1>
+        <p>Edit model profiles live.</p>
+        <div id="admin-list"></div>
+        <button class="btn" style="background: #333;" onclick="saveAdminChanges()">💾 Save Changes</button>
+        <button class="btn" style="background: transparent; border:1px solid #555;" onclick="switchScreen('screen-browse')">Back to App</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // --- DEFAULT DATA (If no admin changes yet) ---
+        let models = [
+            { 
+                id: 'm1', 
+                name: 'Lisa', 
+                age: 24, 
+                pic1: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500', 
+                pic2: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500',
+                bio: 'Naughty & nice. Love deep chats.',
+                type: 'female'
+            },
+            { 
+                id: 'm2', 
+                name: 'Ruby', 
+                age: 22, 
+                pic1: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500', 
+                pic2: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500',
+                bio: 'Here for a good time, not a long time.',
+                type: 'female'
+            }
+        ];
+
+        let userDetails = {};
+
+        // --- NAVIGATION ---
+        function switchScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // --- REGISTRATION LOGIC ---
+        function handleRegistration() {
+            const name = document.getElementById('reg-name').value;
+            const country = document.getElementById('reg-country').value;
+            const pref = document.getElementById('reg-pref').value;
+            const dob = document.getElementById('reg-dob').value;
+
+            if(!name || !country || !dob) {
+                tg.showAlert("Please fill in all details to verify age.");
+                return;
+            }
+
+            // Calculate age
+            const age = new Date().getFullYear() - new Date(dob).getFullYear();
+            if(age < 18) {
+                tg.showAlert("You must be 18+ to enter.");
+                return;
+            }
+
+            userDetails = { name, country, pref, age };
+            
+            // Send Registration Data to Bot (Silent update)
+            tg.sendData(JSON.stringify({
+                action: 'register',
+                user: userDetails
+            }));
+
+            // Move to browse screen
+            renderModels();
+            switchScreen('screen-browse');
+        }
+
+        // --- RENDER MODELS ---
+        function renderModels() {
+            const container = document.getElementById('models-container');
+            container.innerHTML = '';
+
+            // Filter by preference (optional logic)
+            models.forEach(model => {
+                const card = document.createElement('div');
+                card.className = 'model-card';
+                card.innerHTML = `
+                    <div class="model-img-container">
+                        <img src="${model.pic1}" class="model-img">
+                        <div class="lock-overlay" onclick="requestChat('${model.id}', '${model.name}')" style="cursor:pointer; opacity: 0; hover: opacity: 1">
+                            </div>
+                    </div>
+                    <div class="model-info">
+                        <div class="model-name">${model.name}, ${model.age} <span style="font-size:14px; color:#00e676">● Online</span></div>
+                        <div class="model-tags">
+                            <span class="tag">📍 ${userDetails.country || 'Nearby'}</span>
+                            <span class="tag">🔥 2 Pics Unlocked</span>
+                        </div>
+                        <p style="margin-top:10px; margin-bottom:10px">${model.bio}</p>
+                        <button class="btn" style="margin-top:0; padding:10px" onclick="requestChat('${model.id}', '${model.name}')">
+                            💬 Chat with ${model.name}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- REQUEST CHAT (The Main Action) ---
+        function requestChat(modelId, modelName) {
+            tg.showConfirm(`Use 1 Credit to start a private chat with ${modelName}?`, (confirmed) => {
+                if(confirmed) {
+                    tg.sendData(JSON.stringify({
+                        action: 'request_chat',
+                        model_id: modelId,
+                        model_name: modelName,
+                        user_details: userDetails
+                    }));
+                    tg.close();
+                }
+            });
+        }
+
+        // --- ADMIN LOGIC (Secret) ---
+        let adminClickCount = 0;
+        function unlockAdmin() {
+            adminClickCount++;
+            if(adminClickCount === 5) {
+                const pass = prompt("Enter Admin Password:");
+                if(pass === "admin123") { // CHANGE THIS PASSWORD
+                    renderAdmin();
+                    switchScreen('screen-admin');
+                }
+                adminClickCount = 0;
+            }
+        }
+
+        function renderAdmin() {
+            const list = document.getElementById('admin-list');
+            list.innerHTML = '';
+            models.forEach((m, index) => {
+                list.innerHTML += `
+                    <div class="admin-controls">
+                        <h3>Model ${index + 1}</h3>
+                        <div class="edit-row"><label>Name:</label> <input type="text" value="${m.name}" onchange="updateModel(${index}, 'name', this.value)"></div>
+                        <div class="edit-row"><label>Pic 1:</label> <input type="text" value="${m.pic1}" onchange="updateModel(${index}, 'pic1', this.value)"></div>
+                        <div class="edit-row"><label>Bio:</label> <input type="text" value="${m.bio}" onchange="updateModel(${index}, 'bio', this.value)"></div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateModel(index, field, value) {
+            models[index][field] = value;
+        }
+
+        function saveAdminChanges() {
+            // In a real app, this would save to a database via API.
+            // For this version, we will send the new Data to the Bot to save in its memory.
+            tg.sendData(JSON.stringify({
+                action: 'admin_update_models',
+                new_models: models
+            }));
+            alert("Changes sent to Bot!");
+            switchScreen('screen-browse');
+        }
+
+    </script>
 </body>
 </html>
