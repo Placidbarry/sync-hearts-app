@@ -5,204 +5,215 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Velvet Agency</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --gold: #d4af37;
-            --dark: #0a0a0a;
-            --panel: #141414;
-            --text: #e0e0e0;
+            --bg-color: #0d0d0d;
+            --card-bg: #1a1a1a;
+            --primary: #ff3b30; /* Desire Red */
+            --accent: #8e44ad;  /* Luxury Purple */
+            --text: #ffffff;
+            --text-secondary: #888888;
         }
 
         body {
-            background-color: var(--dark);
+            background-color: var(--bg-color);
             color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- SCREENS --- */
+        .screen {
+            display: none;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
             min-height: 100vh;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease;
         }
+        .screen.active { display: flex; }
 
-        h1, h2 { text-align: center; font-weight: 300; letter-spacing: 1px; color: var(--gold); }
-        
-        /* INPUTS */
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-size: 14px; color: #888; }
-        input, select {
-            width: 100%;
-            background: var(--panel);
-            border: 1px solid #333;
-            padding: 15px;
-            color: white;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-            outline: none;
-        }
-        input:focus { border-color: var(--gold); }
-
-        /* CARDS */
-        .profiles-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-            padding-bottom: 80px;
-        }
-
-        .profile-card {
-            background: var(--panel);
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid #222;
-            position: relative;
-        }
-
-        .card-img {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .card-info {
-            padding: 20px;
-            text-align: center;
-        }
-
-        .card-name { font-size: 24px; color: white; margin-bottom: 5px; }
-        .card-status { color: #00ff88; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
-
-        /* BUTTONS */
-        .btn {
-            background: linear-gradient(45deg, #d4af37, #f2d06b);
-            color: black;
-            border: none;
-            padding: 16px;
-            width: 100%;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        /* SCREENS */
-        .screen { display: none; animation: fade 0.4s; }
-        .screen.active { display: block; }
-
-        @keyframes fade {
+        @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        p { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+
+        /* --- FORMS --- */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; color: var(--text-secondary); font-size: 12px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        input, select {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid #333;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .location-row { display: flex; gap: 10px; }
+        .btn-detect {
+            background: #2a2a2a;
+            border: none;
+            color: white;
+            padding: 0 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-main {
+            background: linear-gradient(135deg, var(--primary), #d63031);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: auto;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);
+        }
+        .btn-main:active { transform: scale(0.98); }
+
+        /* --- GENDER SELECTION --- */
+        .gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .gender-option {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        .gender-option.selected { border-color: var(--primary); background: #250a0a; }
+        .emoji { font-size: 32px; display: block; margin-bottom: 5px; }
+
+        /* --- MODEL GALLERY --- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding-bottom: 80px;
+        }
+        .model-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid #333;
+        }
+        .model-card.selected { border: 2px solid var(--primary); }
+        
+        .model-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        .model-info {
+            padding: 10px;
+        }
+        .model-name { font-weight: 700; font-size: 14px; }
+        .model-status { 
+            font-size: 11px; 
+            color: #2ecc71; 
+            display: flex; 
+            align-items: center; 
+            gap: 4px;
+            margin-top: 4px; 
+        }
+        .status-dot { width: 6px; height: 6px; background: #2ecc71; border-radius: 50%; }
+
+        /* --- WAITING ROOM LOADER --- */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60vh;
+        }
+        .pulse-ring {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
     </style>
 </head>
 <body>
 
-    <div id="screen-register" class="screen active">
-        <h1>MEMBER ACCESS</h1>
-        <p style="text-align:center; color:#666; margin-bottom:30px;">Enter your details to view available companions.</p>
-        
-        <div class="input-group">
-            <label>Your Name</label>
-            <input type="text" id="reg-name" placeholder="How should we call you?">
-        </div>
-        
-        <div class="input-group">
-            <label>Date of Birth (Age)</label>
-            <input type="number" id="reg-age" placeholder="25">
+    <div class="screen active" id="screen-register">
+        <h1>Private Access</h1>
+        <p>Register to unlock our exclusive network.</p>
+
+        <div class="form-group">
+            <label>Display Name</label>
+            <input type="text" id="inp-name" placeholder="How should we call you?">
         </div>
 
-        <div class="input-group">
-            <label>City / Location</label>
-            <input type="text" id="reg-loc" placeholder="e.g. London">
+        <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" id="inp-dob" style="color-scheme: dark;">
         </div>
 
-        <div class="input-group">
-            <label>I am looking for...</label>
-            <select id="reg-pref">
-                <option value="Lady">Lady Companion</option>
-                <option value="Boy">Male Companion</option>
-            </select>
-        </div>
-
-        <button class="btn" onclick="goToSelection()">Verify & Continue</button>
-    </div>
-
-    <div id="screen-select" class="screen">
-        <h2>AVAILABLE NOW</h2>
-        <div class="profiles-grid" id="grid">
+        <div class="form-group">
+            <label>Location</label>
+            <div class="location-row">
+                <input type="text" id="inp-location" placeholder="City or Country">
+                <button class="btn-detect" id="btn-geo">📍</button>
             </div>
+        </div>
+
+        <div class="form-group">
+            <label>I am a...</label>
+            <div class="gender-grid">
+                <div class="gender-option" onclick="selectMyGender('Male', this)">
+                    <span class="emoji">👨</span> Man
+                </div>
+                <div class="gender-option" onclick="selectMyGender('Female', this)">
+                    <span class="emoji">👩</span> Woman
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="goToStep2()">Continue</button>
     </div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+    <div class="screen" id="screen-models">
+        <h1>Select Companion</h1>
+        <p>Who matches your mood tonight?</p>
 
-        // --- 1. CONFIGURATION: EDIT YOUR AGENTS HERE ---
-        const agents = [
-            { id: 'agent_01', name: 'Lisa', age: 24, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600' },
-            { id: 'agent_02', name: 'Sarah', age: 22, img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600' },
-            { id: 'agent_03', name: 'Mike', age: 28, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600' }
-        ];
+        <div class="gallery-grid" id="model-list">
+            </div>
 
-        let userData = {};
+        <button class="btn-main" onclick="submitRegistration()">Request Session</button>
+    </div>
 
-        function goToSelection() {
-            // Save Input
-            const name = document.getElementById('reg-name').value;
-            const age = document.getElementById('reg-age').value;
-            if(!name || !age) return tg.showAlert("Please complete your profile.");
+    <div class="screen" id="screen-waiting">
+        <div class="loader-container">
+            <div class="pulse-ring"></div>
+            <h2 style="margin-top: 30px;">Notifying Agents...</h2>
+            <p>Please wait while we connect you to <span id="target-name">...</span></p>
+        </div>
+    </div>
 
-            userData = {
-                name: name,
-                age: age,
-                location: document.getElementById('reg-loc').value,
-                pref: document.getElementById('reg-pref').value
-            };
-
-            // Switch Screen
-            document.getElementById('screen-register').classList.remove('active');
-            document.getElementById('screen-select').classList.add('active');
-
-            renderAgents();
-        }
-
-        function renderAgents() {
-            const container = document.getElementById('grid');
-            
-            // Filter agents if you want (e.g., only show Ladies if pref is Lady)
-            // For now, we show all.
-            agents.forEach(agent => {
-                const card = document.createElement('div');
-                card.className = 'profile-card';
-                card.innerHTML = `
-                    <img src="${agent.img}" class="card-img">
-                    <div class="card-info">
-                        <div class="card-status">● Online</div>
-                        <div class="card-name">${agent.name}, ${agent.age}</div>
-                        <button class="btn" onclick="requestChat('${agent.id}', '${agent.name}')">
-                            Request Chat
-                        </button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function requestChat(agentId, agentName) {
-            tg.HapticFeedback.impactOccurred('heavy');
-            
-            // Send data to Bot
-            const payload = {
-                action: 'request_connection',
-                client_info: userData,
-                target_agent: { id: agentId, name: agentName }
-            };
-
-            tg.sendData(JSON.stringify(payload));
-            tg.close();
-        }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
