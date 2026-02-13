@@ -3,303 +3,766 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Velvet Agency</title>
+    <title>Sync Hearts · Agency</title>
+    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
-    
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #d4af37; /* Gold */
-            --bg: #121212;
-            --card: #1e1e1e;
-            --text: #ffffff;
-            --secondary: #ff3b5c; /* Sexy Red */
-            --input-bg: #2a2a2a;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
-        
+        :root {
+            --tg-bg: var(--tg-theme-bg-color, #0b0e14);
+            --tg-text: var(--tg-theme-text-color, #ffffff);
+            --tg-hint: var(--tg-theme-hint-color, #8e9aaf);
+            --tg-link: var(--tg-theme-link-color, #57a6ff);
+            --tg-button: var(--tg-theme-button-color, #ff3b5c);
+            --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+            --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #1e2229);
+            --card-bg: #252a33;
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 12px;
+        }
+
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+            background: var(--tg-bg);
+            color: var(--tg-text);
+            padding: 20px 16px 30px;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: background 0.2s;
         }
 
-        /* --- NAVIGATION --- */
+        .hidden {
+            display: none !important;
+        }
+
         .screen {
-            display: none;
-            flex-direction: column;
-            height: 100%;
+            display: block;
+            width: 100%;
+        }
+
+        /* HEADER */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 22px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ff6b6b, #ff3b5c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .credit-badge {
+            background: rgba(255, 59, 92, 0.12);
+            padding: 8px 14px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--tg-button);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* FORM ELEMENTS */
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card {
+            background: var(--tg-secondary-bg);
+            border-radius: var(--border-radius-lg);
             padding: 20px;
-            animation: fadeIn 0.3s ease;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.04);
         }
-        .screen.active { display: flex; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* --- FORMS (Registration) --- */
-        .form-group { margin-bottom: 20px; }
-        .label { font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
-        
-        input, select, textarea {
+        .input-field {
             width: 100%;
-            padding: 15px;
-            background: var(--input-bg);
-            border: 1px solid #333;
-            border-radius: 12px;
-            color: white;
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: var(--border-radius-md);
+            padding: 16px 18px;
             font-size: 16px;
+            color: var(--tg-text);
             outline: none;
+            transition: border 0.15s;
+            margin-bottom: 16px;
         }
-        input:focus { border-color: var(--primary); }
 
-        /* --- PHOTO UPLOAD UI --- */
-        .photo-upload-box {
+        .input-field:focus {
+            border-color: var(--tg-button);
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--tg-hint);
+            margin-bottom: 8px;
+        }
+
+        .dropdown {
             width: 100%;
-            height: 150px;
-            background: var(--input-bg);
-            border: 2px dashed #444;
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: var(--border-radius-md);
+            padding: 16px 18px;
+            font-size: 16px;
+            color: var(--tg-text);
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='white'><path d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            margin-bottom: 16px;
+        }
+
+        .gender-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .gender-option {
+            flex: 1;
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: var(--border-radius-md);
+            padding: 14px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.1s;
+        }
+
+        .gender-option.selected {
+            border-color: var(--tg-button);
+            background: rgba(255, 59, 92, 0.08);
+        }
+
+        /* PHOTO UPLOAD */
+        .photo-upload-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+        }
+
+        .photo-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            background: #333a45;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #b0c4ce;
+            overflow: hidden;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-upload {
+            background: rgba(255,255,255,0.08);
+            border: 1px dashed rgba(255,255,255,0.2);
+            border-radius: 40px;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--tg-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-upload:active {
+            background: rgba(255,255,255,0.16);
+        }
+
+        /* BUTTONS */
+        .btn-primary {
+            background: var(--tg-button);
+            color: var(--tg-button-text);
+            border: none;
+            border-radius: 60px;
+            padding: 18px 24px;
+            font-size: 18px;
+            font-weight: 700;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+            margin-top: 8px;
+        }
+
+        .btn-primary:active {
+            opacity: 0.85;
+            transform: scale(0.98);
+        }
+
+        /* AGENT GRID */
+        .agent-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .agent-card {
+            background: var(--tg-secondary-bg);
+            border-radius: var(--border-radius-md);
+            padding: 16px 12px;
+            position: relative;
+            transition: transform 0.1s;
+        }
+
+        .agent-card:active {
+            transform: scale(0.98);
+        }
+
+        .agent-photos {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .agent-thumb {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.06);
+        }
+
+        .agent-thumb.small {
+            width: 48%;
+        }
+
+        .premium-lock {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            width: 32px;
+            height: 32px;
             border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #ffd966;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .agent-name {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .agent-meta {
+            font-size: 13px;
+            color: var(--tg-hint);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .agent-bio {
+            font-size: 13px;
+            color: var(--tg-text);
+            opacity: 0.9;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .chat-btn {
+            background: var(--tg-button);
+            border: none;
+            border-radius: 40px;
+            padding: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--tg-secondary-bg);
+            border-radius: 40px;
+            padding: 8px 12px;
+            margin-top: 30px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        .photo-upload-box img {
-            width: 100%; height: 100%; object-fit: cover; display: none;
-        }
-        .photo-upload-box i { font-size: 30px; color: #666; margin-bottom: 10px; }
-
-        /* --- BUTTONS --- */
-        .btn {
-            background: linear-gradient(45deg, var(--primary), #bfa048);
-            color: black;
-            font-weight: 800;
-            border: none;
-            padding: 18px;
-            border-radius: 50px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: auto; /* Push to bottom */
-            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
-        }
-        .btn:active { transform: scale(0.98); }
-
-        /* --- MODEL GRID --- */
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding-bottom: 80px;
-            overflow-y: auto;
-        }
-        .model-card {
-            background: var(--card);
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .model-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .model-info {
-            padding: 10px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-        }
-        .model-name { font-weight: 700; font-size: 16px; }
-        .model-meta { font-size: 12px; color: #ccc; display: flex; justify-content: space-between; }
-        
-        .status-dot {
-            height: 10px; width: 10px; background-color: #00ff88; border-radius: 50%;
-            display: inline-block; margin-right: 5px;
-        }
-
-        /* --- PROFILE VIEW --- */
-        .profile-header {
-            position: relative;
-            height: 400px;
-        }
-        .profile-hero {
-            width: 100%; height: 100%; object-fit: cover;
-        }
-        .profile-content {
-            padding: 20px;
-            background: var(--bg);
-            border-radius: 30px 30px 0 0;
-            margin-top: -40px;
-            position: relative;
+            padding: 8px 0;
             flex: 1;
+            border-radius: 30px;
+            color: var(--tg-hint);
+            font-size: 12px;
+            gap: 4px;
+            transition: background 0.1s;
         }
-        .tags { display: flex; gap: 10px; margin: 15px 0; }
-        .tag { background: #333; padding: 5px 15px; border-radius: 20px; font-size: 12px; }
 
-        .locked-content {
-            margin-top: 20px;
-            padding: 20px;
-            background: #1a1a1a;
-            border-radius: 15px;
-            border: 1px solid #333;
+        .nav-item.active {
+            color: var(--tg-button);
+            background: rgba(255, 59, 92, 0.08);
+        }
+
+        /* MISC */
+        .footer-note {
             text-align: center;
+            color: var(--tg-hint);
+            font-size: 12px;
+            margin-top: 24px;
         }
-        .blur-grid {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 15px;
-        }
-        .blur-img {
-            width: 100%; height: 60px; filter: blur(8px); border-radius: 8px; background: #333;
-        }
-
-        /* --- ADMIN DASHBOARD --- */
-        .admin-panel { border-top: 2px solid var(--secondary); margin-top: 20px; padding-top: 20px; }
-        .admin-row { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
-
-        /* HEADER */
-        .header {
-            display: flex; justify-content: space-between; align-items: center; padding: 15px;
-        }
-        .balance {
-            background: #333; padding: 5px 12px; border-radius: 20px; font-size: 14px; color: var(--primary);
-        }
-
     </style>
 </head>
 <body>
-
-    <div id="screen-register" class="screen active">
-        <h1 style="margin-bottom: 10px;">Private Access</h1>
-        <p style="color:#888; margin-bottom: 30px;">Create your anonymous profile to view models.</p>
-
-        <div class="form-group">
-            <label class="label">Your Alias</label>
-            <input type="text" id="reg-name" placeholder="e.g. Mr. Grey">
+    <!-- ========== REGISTRATION SCREEN ========== -->
+    <div id="screenRegister" class="screen">
+        <div class="app-header">
+            <span class="logo">✨ Sync Hearts</span>
+            <span class="credit-badge">💎 0 credits</span>
         </div>
 
-        <div class="form-group">
-            <label class="label">Date of Birth</label>
-            <input type="date" id="reg-dob">
-        </div>
-
-        <div class="form-group">
-            <div class="label">Country</div>
-            <select id="reg-country" onchange="loadStates()">
-                <option value="">Select Country</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <div class="label">State / Region</div>
-            <select id="reg-state" disabled>
-                <option value="">Select Country First</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label class="label">Looking For</label>
-            <select id="reg-pref">
-                <option value="female">Female Models</option>
-                <option value="male">Male Models</option>
-                <option value="trans">Trans Models</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label class="label">Profile Photo (Private)</label>
-            <div class="photo-upload-box" onclick="document.getElementById('file-input').click()">
-                <i class="fas fa-camera"></i>
-                <span>Tap to upload</span>
-                <img id="preview-img">
+        <div class="card">
+            <div class="section-title">
+                <span>📋 Complete registration</span>
             </div>
-            <input type="file" id="file-input" hidden accept="image/*" onchange="previewFile()">
-        </div>
-
-        <button class="btn" onclick="submitRegistration()">COMPLETE REGISTRATION</button>
-    </div>
-
-    <div id="screen-browse" class="screen">
-        <div class="header">
-            <h2 style="color: white;">Velvet Agency</h2>
-            <div class="balance"><i class="fas fa-coins"></i> <span id="user-credits">0</span></div>
-        </div>
-
-        <div style="display: flex; gap: 15px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
-            <div class="tag" style="background: var(--primary); color: black; font-weight: bold;">All</div>
-            <div class="tag">New</div>
-            <div class="tag">Online</div>
-            <div class="tag">VIP</div>
-        </div>
-
-        <div class="grid" id="models-container">
-            </div>
-    </div>
-
-    <div id="screen-profile" class="screen" style="padding: 0;">
-        <div class="profile-header">
-            <img id="p-img" src="" class="profile-hero">
-            <div style="position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.5); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-            </div>
-        </div>
-        <div class="profile-content">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h1 id="p-name">Model Name</h1>
-                <span style="color: #00ff88; font-size: 14px;">● Online</span>
-            </div>
-            <p id="p-meta" style="color: #888; font-size: 14px; margin-top: 5px;">24 • 2km Away</p>
             
-            <div class="tags">
-                <span class="tag">GDE</span>
-                <span class="tag">Roleplay</span>
-                <span class="tag">Sexting</span>
+            <!-- Age -->
+            <div class="input-label">Your age</div>
+            <input type="number" id="ageInput" class="input-field" placeholder="e.g. 25" min="18" max="100" value="">
+
+            <!-- Country dropdown -->
+            <div class="input-label">Country</div>
+            <select id="countrySelect" class="dropdown"></select>
+
+            <!-- State / Region -->
+            <div class="input-label">State / Region</div>
+            <input type="text" id="stateInput" class="input-field" placeholder="e.g. California">
+
+            <!-- Looking for -->
+            <div class="input-label">I'm looking for...</div>
+            <div class="gender-row" id="lookingForGroup">
+                <div class="gender-option" data-value="female">💃 Women</div>
+                <div class="gender-option" data-value="male">🕺 Men</div>
             </div>
 
-            <p id="p-bio" style="line-height: 1.6; color: #ccc;">
-                Bio goes here...
-            </p>
-
-            <div class="locked-content">
-                <div style="color: var(--primary); font-weight: bold; margin-bottom: 10px;">
-                    <i class="fas fa-lock"></i> PRIVATE GALLERY
+            <!-- Profile photo upload -->
+            <div class="input-label">Your profile picture</div>
+            <div class="photo-upload-area">
+                <div class="photo-preview" id="photoPreview">
+                    <span>📸</span>
                 </div>
-                <div class="blur-grid">
-                    <div class="blur-img"></div>
-                    <div class="blur-img"></div>
-                    <div class="blur-img"></div>
+                <div class="btn-upload" id="uploadPhotoBtn">
+                    ⬆️ Upload photo
                 </div>
-                <button class="btn" style="padding: 10px; font-size: 12px; background: #333; border: 1px solid var(--primary); color: var(--primary);">
-                    Unlock Photos (5 Credits)
-                </button>
             </div>
+            <input type="hidden" id="photoFileId" value="">
+        </div>
 
-            <br><br>
-            <button class="btn" id="start-chat-btn">
-                <i class="fas fa-comment-alt"></i> START PRIVATE CHAT
-            </button>
+        <button class="btn-primary" id="completeRegistrationBtn">
+            ✅ Complete & browse agents
+        </button>
+        <div class="footer-note">By registering you confirm you are 18+</div>
+    </div>
+
+    <!-- ========== AGENT BROWSER SCREEN (hidden by default) ========== -->
+    <div id="screenAgents" class="screen hidden">
+        <div class="app-header">
+            <span class="logo">✨ Sync Hearts</span>
+            <span class="credit-badge" id="creditDisplay">💎 0 credits</span>
+        </div>
+
+        <div class="section-title">
+            <span>🔥 Available companions</span>
+        </div>
+
+        <!-- Agent grid will be injected here via JS -->
+        <div id="agentGridContainer" class="agent-grid"></div>
+
+        <!-- Bottom navigation (inline menu style) -->
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <span>👥</span>
+                <span>Browse</span>
+            </div>
+            <div class="nav-item" id="navCredits">
+                <span>💎</span>
+                <span>Buy</span>
+            </div>
+            <div class="nav-item" id="navProfile">
+                <span>👤</span>
+                <span>Profile</span>
+            </div>
+            <div class="nav-item" id="navSupport">
+                <span>📞</span>
+                <span>Support</span>
+            </div>
         </div>
     </div>
 
-    <div id="screen-admin" class="screen">
-        <h1>Agency Dashboard</h1>
-        <p>Manage your models.</p>
-        <br>
-        <button class="btn" onclick="openAddModelModal()">+ ADD NEW MODEL</button>
-        <br><br>
-        <div id="admin-models-list">
-            </div>
-    </div>
+    <script>
+        // ---------- TELEGRAM INIT ----------
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        tg.enableClosingConfirmation();
 
-    <script src="main.js"></script>
+        // ---------- GLOBAL STATE ----------
+        let registrationData = {
+            age: '',
+            country: '',
+            state: '',
+            lookingFor: '',
+            photoFileId: ''
+        };
+        let userCredits = 0; // will be updated from bot later
+
+        // ---------- POPULATE COUNTRY DROPDOWN ----------
+        const countryList = [
+            "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
+            "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia",
+            "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
+            "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia",
+            "Comoros", "Congo", "Costa Rica", "Côte d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czech Republic",
+            "Denmark", "Djibouti", "Dominica", "Dominican Republic",
+            "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia",
+            "Fiji", "Finland", "France",
+            "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau",
+            "Guyana", "Haiti", "Honduras", "Hungary",
+            "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy",
+            "Jamaica", "Japan", "Jordan",
+            "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South", "Kosovo", "Kuwait", "Kyrgyzstan",
+            "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
+            "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius",
+            "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
+            "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia",
+            "Norway", "Oman",
+            "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland",
+            "Portugal", "Qatar",
+            "Romania", "Russia", "Rwanda",
+            "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe",
+            "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia",
+            "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname",
+            "Sweden", "Switzerland", "Syria",
+            "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago",
+            "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
+            "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
+            "Vanuatu", "Vatican City", "Venezuela", "Vietnam",
+            "Yemen",
+            "Zambia", "Zimbabwe"
+        ];
+
+        function populateCountries() {
+            const select = document.getElementById('countrySelect');
+            select.innerHTML = '<option value="" disabled selected>Select your country</option>';
+            countryList.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                select.appendChild(option);
+            });
+        }
+        populateCountries();
+
+        // ---------- LOOKING FOR SELECTION ----------
+        const genderOptions = document.querySelectorAll('.gender-option');
+        genderOptions.forEach(opt => {
+            opt.addEventListener('click', function() {
+                genderOptions.forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                registrationData.lookingFor = this.dataset.value;
+            });
+        });
+
+        // ---------- PHOTO UPLOAD (Telegram File Picker) ----------
+        document.getElementById('uploadPhotoBtn').addEventListener('click', async function() {
+            tg.HapticFeedback.impactOccurred('light');
+            // Telegram Web App method to open file picker (images only)
+            tg.openPhotoPicker({
+                max: 1,
+                success: (files) => {
+                    if (files && files.length > 0) {
+                        const file = files[0];
+                        // Get the Telegram file ID
+                        const fileId = file.fileId;
+                        registrationData.photoFileId = fileId;
+                        document.getElementById('photoFileId').value = fileId;
+                        
+                        // Show preview (Telegram provides a temporary URL)
+                        if (file.url) {
+                            const previewDiv = document.getElementById('photoPreview');
+                            previewDiv.innerHTML = `<img src="${file.url}" style="width:100%;height:100%;object-fit:cover;">`;
+                        } else {
+                            // fallback
+                            document.getElementById('photoPreview').innerHTML = '<span>✅</span>';
+                        }
+                    }
+                },
+                fail: (error) => {
+                    tg.showAlert('Photo selection cancelled or failed.');
+                }
+            });
+        });
+
+        // ---------- COMPLETE REGISTRATION ----------
+        document.getElementById('completeRegistrationBtn').addEventListener('click', function() {
+            // Validate inputs
+            const age = document.getElementById('ageInput').value;
+            if (!age || age < 18) {
+                tg.showAlert('Please enter a valid age (18+).');
+                return;
+            }
+            const country = document.getElementById('countrySelect').value;
+            if (!country) {
+                tg.showAlert('Please select your country.');
+                return;
+            }
+            const state = document.getElementById('stateInput').value.trim();
+            if (!state) {
+                tg.showAlert('Please enter your state/region.');
+                return;
+            }
+            if (!registrationData.lookingFor) {
+                tg.showAlert('Please select who you are looking for.');
+                return;
+            }
+
+            // Save registration data
+            registrationData.age = age;
+            registrationData.country = country;
+            registrationData.state = state;
+
+            // Send registration to bot
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.sendData(JSON.stringify({
+                action: 'register_client',
+                age: registrationData.age,
+                country: registrationData.country,
+                state: registrationData.state,
+                looking_for: registrationData.lookingFor,
+                photo_file_id: registrationData.photoFileId || '',
+                user_id: tg.initDataUnsafe?.user?.id,
+                username: tg.initDataUnsafe?.user?.username,
+                first_name: tg.initDataUnsafe?.user?.first_name
+            }));
+
+            // For demo, simulate success and switch to agent browser
+            tg.showAlert('✅ Registration sent! Loading companions...');
+            switchToAgentScreen();
+        });
+
+        // ---------- SWITCH SCREENS ----------
+        function switchToAgentScreen() {
+            document.getElementById('screenRegister').classList.add('hidden');
+            document.getElementById('screenAgents').classList.remove('hidden');
+            renderAgentGrid();
+            // Request credit balance from bot (will be sent via initData or we can ask)
+            // For now just show 10 as placeholder
+            document.getElementById('creditDisplay').innerHTML = '💎 10 credits';
+        }
+
+        // ---------- RENDER AGENT GRID (DEMO DATA) ----------
+        // In production, this data will come from the bot via WebAppInitData or a separate sendData call.
+        const demoAgents = [
+            {
+                id: 'agent_001',
+                name: 'Sophia',
+                age: 26,
+                location: 'New York',
+                bio: 'Soft voice, sensual talk. I love roleplay.',
+                profilePics: [
+                    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop',
+                    'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200&h=200&fit=crop'
+                ],
+                premiumPics: 2, // number of locked pics
+                verified: true
+            },
+            {
+                id: 'agent_002',
+                name: 'Emma',
+                age: 24,
+                location: 'London',
+                bio: 'Flirty and playful. Let’s get naughty.',
+                profilePics: [
+                    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop',
+                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop'
+                ],
+                premiumPics: 3,
+                verified: true
+            },
+            {
+                id: 'agent_003',
+                name: 'Mia',
+                age: 28,
+                location: 'Miami',
+                bio: 'Passionate and open-minded. No limits.',
+                profilePics: [
+                    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop',
+                    'https://images.unsplash.com/photo-1554151228-14d9def656e4?w=200&h=200&fit=crop'
+                ],
+                premiumPics: 2,
+                verified: false
+            },
+            {
+                id: 'agent_004',
+                name: 'Lisa',
+                age: 22,
+                location: 'Berlin',
+                bio: 'College girl, curious and kinky.',
+                profilePics: [
+                    'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&h=200&fit=crop',
+                    'https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?w=200&h=200&fit=crop'
+                ],
+                premiumPics: 4,
+                verified: true
+            }
+        ];
+
+        function renderAgentGrid() {
+            const container = document.getElementById('agentGridContainer');
+            container.innerHTML = '';
+            demoAgents.forEach(agent => {
+                const card = document.createElement('div');
+                card.className = 'agent-card';
+                card.dataset.agentId = agent.id;
+
+                // Photos grid (first two profile pics)
+                let photosHtml = `<div class="agent-photos">`;
+                agent.profilePics.slice(0, 2).forEach((pic, index) => {
+                    photosHtml += `<img src="${pic}" class="agent-thumb ${agent.profilePics.length > 1 ? 'small' : ''}" alt="profile">`;
+                });
+                photosHtml += `</div>`;
+
+                // Premium lock if has premium pics
+                const lockHtml = agent.premiumPics > 0 ? `<div class="premium-lock">🔒${agent.premiumPics}</div>` : '';
+
+                // Verified badge
+                const verifiedBadge = agent.verified ? '✓' : '';
+
+                card.innerHTML = `
+                    ${lockHtml}
+                    ${photosHtml}
+                    <div class="agent-name">${agent.name}, ${agent.age} ${verifiedBadge}</div>
+                    <div class="agent-meta">📍 ${agent.location}</div>
+                    <div class="agent-bio">${agent.bio}</div>
+                    <button class="chat-btn" data-agent-id="${agent.id}" data-agent-name="${agent.name}">
+                        💬 Chat now
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+
+            // Attach event listeners to chat buttons
+            document.querySelectorAll('.chat-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const agentId = this.dataset.agentId;
+                    const agentName = this.dataset.agentName;
+                    requestChat(agentId, agentName);
+                });
+            });
+        }
+
+        // ---------- REQUEST CHAT (PAY & CONNECT) ----------
+        function requestChat(agentId, agentName) {
+            tg.HapticFeedback.impactOccurred('heavy');
+            tg.showConfirm(`💎 Start private chat with ${agentName}? (1 credit)`, (confirmed) => {
+                if (confirmed) {
+                    tg.sendData(JSON.stringify({
+                        action: 'request_chat',
+                        agent_id: agentId,
+                        agent_name: agentName,
+                        client_id: tg.initDataUnsafe?.user?.id,
+                        timestamp: Date.now()
+                    }));
+                    tg.showAlert('⏳ Searching for available agent... you will be notified.');
+                    // In production, bot will handle waiting room.
+                    // For demo, close mini app.
+                    setTimeout(() => tg.close(), 1500);
+                }
+            });
+        }
+
+        // ---------- BOTTOM NAVIGATION (Placeholders) ----------
+        document.getElementById('navCredits').addEventListener('click', function() {
+            tg.HapticFeedback.impactOccurred('light');
+            tg.sendData(JSON.stringify({ action: 'buy_credits' }));
+            tg.showAlert('💎 Redirecting to payment...');
+            tg.close();
+        });
+
+        document.getElementById('navProfile').addEventListener('click', function() {
+            tg.HapticFeedback.impactOccurred('light');
+            tg.sendData(JSON.stringify({ action: 'view_profile' }));
+            tg.showAlert('👤 Viewing your profile');
+            tg.close();
+        });
+
+        document.getElementById('navSupport').addEventListener('click', function() {
+            tg.HapticFeedback.impactOccurred('light');
+            tg.sendData(JSON.stringify({ action: 'support' }));
+            tg.showAlert('📞 Support will contact you soon');
+            tg.close();
+        });
+
+        // ---------- INITIAL CREDITS FROM BOT (if passed via initData) ----------
+        // For demo we set default
+        window.addEventListener('load', function() {
+            // If initData contains user credits, we could parse it.
+            // Currently we just show placeholder.
+        });
+
+        console.log('HTML Mini App ready.');
+    </script>
 </body>
 </html>
