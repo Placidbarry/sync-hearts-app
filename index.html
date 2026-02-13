@@ -3,458 +3,674 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sync Hearts Premium</title>
+    <title>Velvet Connection - VIP</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #ff4b81;
-            --secondary: #a259ff;
-            --dark: #121212;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --glass: rgba(255, 255, 255, 0.15);
-            --text-main: #333;
-            --text-sub: #777;
+            --bg-color: #0f0f13;
+            --card-bg: #1a1a20;
+            --primary: #d4af37; /* Gold */
+            --primary-gradient: linear-gradient(135deg, #d4af37, #aa8e2d);
+            --accent: #ff2d55; /* Passion Red/Pink */
+            --text-main: #ffffff;
+            --text-sub: #8e8e93;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
-        /* DARK MODE SUPPORT */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --card-bg: rgba(30, 30, 40, 0.95);
-                --text-main: #fff;
-                --text-sub: #aaa;
-            }
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif; }
-        
         body {
-            background: linear-gradient(135deg, #f6d5f7 0%, #fbe9d7 100%);
-            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
             color: var(--text-main);
             overflow-x: hidden;
-            padding-bottom: 80px; /* Space for bottom nav */
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- ANIMATIONS --- */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        /* --- UTILITIES --- */
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-in; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        .screen {
-            display: none;
-            padding: 20px;
-            animation: fadeIn 0.4s ease-out;
+        /* --- ONBOARDING (Gender Select) --- */
+        #onboarding {
             height: 100vh;
-            flex-direction: column;
-        }
-
-        .screen.active { display: flex; }
-
-        /* --- SCREEN 1: SPLASH & GENDER --- */
-        .intro-container {
-            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            padding: 20px;
+            background: radial-gradient(circle at center, #2a2a35 0%, #0f0f13 100%);
             text-align: center;
         }
 
-        .logo-glow {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 50px;
-            color: white;
-            box-shadow: 0 10px 30px rgba(255, 75, 129, 0.4);
-            margin-bottom: 30px;
-            animation: pulse 2s infinite;
+        .logo-area {
+            margin-bottom: 40px;
+        }
+        
+        .logo-icon {
+            font-size: 48px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
         }
 
-        h1 { font-size: 28px; font-weight: 800; margin-bottom: 10px; background: -webkit-linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        p.subtitle { color: var(--text-sub); font-size: 16px; margin-bottom: 40px; max-width: 80%; line-height: 1.5; }
+        .h1-premium {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin: 0;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-        .gender-options { display: flex; gap: 20px; width: 100%; justify-content: center; }
-        .gender-btn {
+        .subtitle {
+            color: var(--text-sub);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .gender-options {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            max-width: 340px;
+        }
+
+        .gender-card {
+            flex: 1;
             background: var(--card-bg);
-            border: 2px solid transparent;
-            padding: 20px;
+            border: 1px solid var(--border);
             border-radius: 20px;
-            width: 140px;
+            padding: 30px 10px;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-        .gender-btn.selected { border-color: var(--primary); background: rgba(255, 75, 129, 0.05); }
-        .gender-icon { font-size: 40px; margin-bottom: 10px; display: block; }
-        .gender-text { font-weight: 600; font-size: 16px; }
-
-        .next-btn {
-            margin-top: 40px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 16px 40px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 700;
-            width: 100%;
-            max-width: 300px;
-            box-shadow: 0 8px 20px rgba(255, 75, 129, 0.3);
-            cursor: pointer;
         }
 
-        /* --- SCREEN 2: DASHBOARD --- */
-        .header {
+        .gender-card:active {
+            transform: scale(0.95);
+            border-color: var(--primary);
+        }
+
+        .gender-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* --- MAIN APP INTERFACE --- */
+        #app-view {
+            padding-bottom: 80px; /* Space for nav */
+        }
+
+        /* Header */
+        .top-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 15px;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            background: rgba(15, 15, 19, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
         }
-        .balance-badge {
-            background: rgba(0,0,0,0.05);
-            padding: 6px 12px;
-            border-radius: 20px;
+
+        .coin-balance {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-weight: 700;
             font-size: 14px;
-            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 6px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
         }
 
-        /* Featured Slider */
-        .featured-section { margin-bottom: 25px; }
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .section-title span { color: var(--primary); font-size: 14px; }
-        
-        .story-scroller {
+        /* Story/Status Bar */
+        .stories-container {
+            padding: 10px 20px;
             display: flex;
-            gap: 15px;
+            gap: 16px;
             overflow-x: auto;
-            padding-bottom: 10px;
             scrollbar-width: none;
         }
-        .story-item {
-            flex: 0 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 70px;
-        }
-        .story-ring {
+        .stories-container::-webkit-scrollbar { display: none; }
+
+        .story-circle {
             width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            padding: 3px;
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-            margin-bottom: 5px;
+            flex-shrink: 0;
+            text-align: center;
         }
+
+        .story-ring {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            padding: 2px;
+            background: var(--primary-gradient);
+            position: relative;
+        }
+
         .story-img {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 2px solid #fff;
+            border: 3px solid var(--bg-color);
             object-fit: cover;
         }
-        .story-name { font-size: 12px; font-weight: 500; }
 
-        /* Agent Cards */
-        .grid-container {
+        .live-badge {
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff0040;
+            color: white;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            border: 2px solid var(--bg-color);
+        }
+
+        /* Main Grid */
+        .section-title {
+            padding: 20px 20px 10px;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .fire-icon { color: var(--accent); }
+
+        .profiles-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding-bottom: 100px; /* Space for bottom nav */
+            gap: 12px;
+            padding: 0 16px;
         }
-        .agent-card {
+
+        .profile-card {
             background: var(--card-bg);
-            border-radius: 20px;
+            border-radius: 16px;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .agent-card:active { transform: scale(0.98); }
-        .agent-photo {
+
+        .card-image-container {
+            position: relative;
+            height: 200px;
+        }
+
+        .card-img {
             width: 100%;
-            height: 180px;
+            height: 100%;
             object-fit: cover;
         }
-        .online-dot {
+
+        .blur-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            z-index: 1;
+        }
+
+        .card-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            z-index: 2;
+        }
+
+        .card-name {
+            font-weight: 700;
+            font-size: 16px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .card-status {
+            font-size: 12px;
+            color: #4cd964;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #4cd964;
+            border-radius: 50%;
+        }
+
+        /* Private Benefits Overlay (Locked content) */
+        .locked-content {
             position: absolute;
             top: 10px;
             right: 10px;
-            width: 12px;
-            height: 12px;
-            background: #00ff88;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 0 5px rgba(0,255,136,0.5);
-        }
-        .vip-blur {
-            position: absolute;
-            inset: 0;
             background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(4px);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            color: var(--primary);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        /* --- BOTTOM NAVIGATION --- */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #16161a;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 24px; /* Extra padding for iOS home bar */
+            z-index: 200;
+        }
+
+        .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            color: white;
-            opacity: 0;
-            transition: opacity 0.3s;
+            font-size: 10px;
+            color: var(--text-sub);
+            gap: 4px;
         }
-        .agent-card.locked .vip-blur { opacity: 1; }
-        
-        .agent-info { padding: 12px; }
-        .agent-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
-        .agent-meta { font-size: 12px; color: var(--text-sub); display: flex; gap: 5px; align-items: center; }
-        .action-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        /* --- MODAL (Profile View) --- */
+        #profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            padding: 8px;
-            border-radius: 12px;
-            margin-top: 10px;
-            font-weight: 600;
-            font-size: 13px;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 300;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        #profile-modal.visible {
+            transform: translateY(0);
+        }
+
+        .modal-header-img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 18px;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            position: relative;
+            margin-top: -40px;
+            background: var(--bg-color);
+            border-radius: 30px 30px 0 0;
+            padding: 30px 20px 100px;
+            min-height: 50vh;
+        }
+
+        .modal-name {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .modal-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-main {
+            flex: 2;
+            background: var(--primary-gradient);
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            color: #000;
+            font-weight: 700;
+            font-size: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            cursor: pointer;
         }
 
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(20px);
-            padding: 15px 30px;
-            border-radius: 40px;
-            display: flex;
-            justify-content: space-between;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-        .nav-item { font-size: 24px; color: #ccc; cursor: pointer; position: relative; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item.active::after {
-            content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
-            width: 5px; height: 5px; background: var(--primary); border-radius: 50%;
+        .btn-gift {
+            flex: 1;
+            background: #2c2c35;
+            border: 1px solid var(--border);
+            color: #fff;
+            border-radius: 16px;
+            font-size: 24px;
+            cursor: pointer;
         }
 
-        /* --- NOTIFICATION --- */
-        .toast {
-            position: fixed;
-            top: 20px;
+        .private-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 30px;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: blur(15px); /* BLURRED CONTENT */
+        }
+
+        .lock-overlay {
+            position: absolute;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: #333;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-size: 14px;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 2000;
-            display: flex;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .verify-badge {
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            gap: 4px;
+            background: rgba(76, 217, 100, 0.1);
+            color: #4cd964;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
         }
-        .toast.show { transform: translateX(-50%) translateY(0); }
 
     </style>
 </head>
 <body>
 
-    <div class="screen active" id="screen-intro">
-        <div class="intro-container">
-            <div class="logo-glow">
-                <i class="fas fa-heart"></i>
+    <div id="onboarding">
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fas fa-crown"></i></div>
+            <h1 class="h1-premium">VELVET</h1>
+            <div class="subtitle">Exclusive Connections & Companions</div>
+        </div>
+
+        <div style="margin-bottom: 20px; font-weight: 600;">I am a:</div>
+        
+        <div class="gender-options">
+            <div class="gender-card" onclick="selectGender('male')">
+                <span class="gender-icon">👨</span>
+                <div>Male</div>
             </div>
-            <h1>Sync Hearts</h1>
-            <p class="subtitle">Connect with verified companions instantly. Safe, private, and exclusive.</p>
-            
-            <div style="text-align: left; width: 100%; margin-bottom: 15px; font-weight: 600;">I am a:</div>
-            
-            <div class="gender-options">
-                <div class="gender-btn" onclick="selectGender('male', this)">
-                    <span class="gender-icon">👨</span>
-                    <span class="gender-text">Male</span>
+            <div class="gender-card" onclick="selectGender('female')">
+                <span class="gender-icon">👩</span>
+                <div>Female</div>
+            </div>
+        </div>
+        <p style="margin-top: 30px; font-size: 12px; color: #555;">By continuing, you agree to our 18+ VIP Terms.</p>
+    </div>
+
+    <div id="app-view" class="hidden">
+        
+        <div class="top-nav">
+            <div style="font-weight: 800; font-size: 20px; letter-spacing: -0.5px;">
+                <i class="fas fa-crown" style="color: var(--primary);"></i> Velvet
+            </div>
+            <div class="coin-balance" onclick="tg.showAlert('Top up via /buy command!')">
+                <i class="fas fa-coins"></i> <span id="credit-display">0</span>
+            </div>
+        </div>
+
+        <div class="stories-container">
+            <div class="story-circle">
+                <div class="story-ring">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop" class="story-img">
+                    <div class="live-badge">LIVE</div>
                 </div>
-                <div class="gender-btn" onclick="selectGender('female', this)">
-                    <span class="gender-icon">👩</span>
-                    <span class="gender-text">Female</span>
-                </div>
+                <div style="font-size: 11px; margin-top: 4px;">Mia</div>
+            </div>
             </div>
 
-            <button class="next-btn" onclick="goToDashboard()">Start Matching</button>
+        <div class="section-title">
+            <span>Nearby Companions</span>
+            <i class="fas fa-fire fire-icon"></i>
+        </div>
+
+        <div class="profiles-grid" id="grid-container">
+            </div>
+
+    </div>
+
+    <div class="bottom-bar hidden" id="bottom-nav">
+        <div class="nav-item active">
+            <i class="fas fa-compass nav-icon"></i>
+            <span>Discover</span>
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-heart nav-icon"></i>
+            <span>Matches</span>
+        </div>
+        <div class="nav-item" style="color: var(--primary);">
+            <i class="fas fa-gem nav-icon" style="font-size: 24px;"></i>
+            <span>VIP</span>
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-comments nav-icon"></i>
+            <span>Chats</span>
         </div>
     </div>
 
-    <div class="screen" id="screen-dashboard">
-        <div class="header">
-            <h2 style="font-weight: 800;">Discover</h2>
-            <div class="balance-badge">
-                <i class="fas fa-gem" style="color: #a259ff;"></i>
-                <span id="credit-display">0</span> Credits
+    <div id="profile-modal">
+        <button class="close-btn" onclick="closeModal()"><i class="fas fa-arrow-left"></i></button>
+        <img src="" id="modal-img" class="modal-header-img">
+        
+        <div class="modal-body">
+            <div class="verify-badge"><i class="fas fa-check-circle"></i> ID Verified Agent</div>
+            <div class="modal-name" id="modal-name">Name, Age</div>
+            <div style="color: #4cd964; margin-bottom: 12px; font-size: 14px;">● Online Now</div>
+            
+            <div class="modal-tags">
+                <span class="tag">🇬🇧 English</span>
+                <span class="tag">📸 Photos</span>
+                <span class="tag">💬 Chat</span>
             </div>
-        </div>
 
-        <div class="featured-section">
-            <div class="section-title">
-                Online Now <span onclick="showToast('Loading online users...')">See All</span>
+            <p style="color: #ccc; line-height: 1.5; font-size: 15px;" id="modal-bio">
+                Looking for a good time? I'm fun, open-minded, and love to chat. Let's get to know each other better in private...
+            </p>
+
+            <div class="action-buttons">
+                <button class="btn-main" id="connect-btn">
+                    <i class="fas fa-comment-dots"></i> Private Chat
+                </button>
+                <button class="btn-gift">
+                    <i class="fas fa-gift"></i>
+                </button>
             </div>
-            <div class="story-scroller" id="story-container">
+
+            <div style="margin-top: 30px; font-weight: 700; display: flex; justify-content: space-between;">
+                <span>Private Gallery</span>
+                <span style="color: var(--primary); font-size: 14px;">🔒 Unlock VIP</span>
+            </div>
+
+            <div class="private-gallery">
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=200" loading="lazy">
+                    <div class="lock-overlay"><i class="fas fa-lock"></i></div>
                 </div>
-        </div>
-
-        <div class="section-title">Recommended for You</div>
-        <div class="grid-container" id="grid-container">
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200" loading="lazy">
+                    <div class="lock-overlay"><i class="fas fa-lock"></i></div>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200" loading="lazy">
+                    <div class="lock-overlay"><i class="fas fa-lock"></i></div>
+                </div>
             </div>
-
-        <div class="bottom-nav">
-            <div class="nav-item active"><i class="fas fa-compass"></i></div>
-            <div class="nav-item" onclick="showToast('Upgrade to VIP to see matches')"><i class="fas fa-heart"></i></div>
-            <div class="nav-item" onclick="triggerBotAction('buy_credits')"><i class="fas fa-comment-dollar"></i></div>
-            <div class="nav-item" onclick="triggerBotAction('profile')"><i class="fas fa-user"></i></div>
         </div>
-    </div>
-
-    <div class="toast" id="toast">
-        <i class="fas fa-check-circle" style="color: #00ff88;"></i>
-        <span id="toast-msg">Action Successful</span>
     </div>
 
     <script>
-        // --- CONFIG & DATA ---
         const tg = window.Telegram.WebApp;
         tg.expand(); // Fullscreen
-        
-        let userCredits = 10;
-        let selectedGender = null;
+        tg.enableClosingConfirmation();
 
+        // Placeholder Data for Agents
         const agents = [
-            { id: '1', name: 'Sophia', age: 24, img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop', verified: true, premium: false },
-            { id: '2', name: 'Isabella', age: 22, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop', verified: true, premium: true },
-            { id: '3', name: 'Emma', age: 25, img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop', verified: false, premium: false },
-            { id: '4', name: 'Mia', age: 23, img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop', verified: true, premium: true },
-            { id: '5', name: 'Ava', age: 26, img: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=400&fit=crop', verified: true, premium: false },
-            { id: '6', name: 'Charlotte', age: 21, img: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=400&fit=crop', verified: false, premium: true },
+            { id: 1, name: "Sophia", age: 23, img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop", bio: "Fun and flirty. Love late night chats.", online: true },
+            { id: 2, name: "Elena", age: 25, img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=500&fit=crop", bio: "Let me be your secret. 🤫", online: true },
+            { id: 3, name: "Ruby", age: 21, img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=500&fit=crop", bio: "Here to make you smile.", online: false },
+            { id: 4, name: "Jade", age: 24, img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=500&fit=crop", bio: "Adventures and fun times.", online: true },
+            { id: 5, name: "Sasha", age: 22, img: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=500&fit=crop", bio: "Waiting for you...", online: true },
+            { id: 6, name: "Nora", age: 26, img: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=500&fit=crop", bio: "Classy and sassy.", online: false },
         ];
 
-        // --- FUNCTIONS ---
+        let userCredits = 10; // Default
 
-        function selectGender(gender, btn) {
-            selectedGender = gender;
-            document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            tg.HapticFeedback.selectionChanged();
-        }
-
-        function goToDashboard() {
-            if (!selectedGender) {
-                showToast("Please select your gender first");
-                tg.HapticFeedback.notificationOccurred('error');
-                return;
-            }
-            document.getElementById('screen-intro').classList.remove('active');
-            document.getElementById('screen-dashboard').classList.add('active');
-            renderDashboard();
-        }
-
-        function renderDashboard() {
-            document.getElementById('credit-display').innerText = userCredits;
-            
-            // 1. Render Stories (Online Now)
-            const storyContainer = document.getElementById('story-container');
-            agents.forEach(agent => {
-                storyContainer.innerHTML += `
-                    <div class="story-item" onclick="connectAgent('${agent.id}', '${agent.name}')">
-                        <div class="story-ring"><img src="${agent.img}" class="story-img"></div>
-                        <div class="story-name">${agent.name}</div>
-                    </div>
-                `;
-            });
-
-            // 2. Render Grid
-            const grid = document.getElementById('grid-container');
-            agents.forEach(agent => {
-                const isPremium = agent.premium;
-                grid.innerHTML += `
-                    <div class="agent-card ${isPremium ? 'locked' : ''}" onclick="${isPremium ? "showVipModal()" : `connectAgent('${agent.id}', '${agent.name}')`}">
-                        <div class="online-dot"></div>
-                        <img src="${agent.img}" class="agent-photo">
-                        ${isPremium ? `
-                        <div class="vip-blur">
-                            <i class="fas fa-lock" style="font-size: 24px; margin-bottom: 10px;"></i>
-                            <div style="font-weight:700;">VIP ONLY</div>
-                            <div style="font-size:10px;">Click to Unlock</div>
-                        </div>` : ''}
-                        <div class="agent-info">
-                            <div class="agent-name">${agent.name}, ${agent.age} ${agent.verified ? '<i class="fas fa-check-circle" style="color:#0088cc; font-size:12px;"></i>' : ''}</div>
-                            <div class="agent-meta">
-                                <i class="fas fa-map-marker-alt"></i> 2km away
-                            </div>
-                            <button class="action-btn">
-                                ${isPremium ? '<i class="fas fa-crown"></i> Unlock' : '<i class="fas fa-comment-dots"></i> Chat Now'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function connectAgent(id, name) {
+        // 1. Onboarding Logic
+        function selectGender(gender) {
+            // Add vibration for premium feel
             tg.HapticFeedback.impactOccurred('medium');
-            tg.showConfirm(`Start private chat with ${name}? Cost: 1 Credit.`, (confirm) => {
-                if (confirm) {
-                    // Send data back to Bot
-                    tg.sendData(JSON.stringify({
-                        action: 'pay_connect',
-                        worker_id: id,
-                        worker_name: name
-                    }));
-                }
+            
+            document.getElementById('onboarding').classList.add('hidden');
+            document.getElementById('app-view').classList.remove('hidden');
+            document.getElementById('app-view').classList.add('fade-in');
+            document.getElementById('bottom-nav').classList.remove('hidden');
+            
+            // Render grid
+            renderGrid();
+        }
+
+        // 2. Render Grid
+        function renderGrid() {
+            const container = document.getElementById('grid-container');
+            container.innerHTML = '';
+
+            agents.forEach(agent => {
+                const card = document.createElement('div');
+                card.className = 'profile-card';
+                card.onclick = () => openProfile(agent);
+                card.innerHTML = `
+                    <div class="card-image-container">
+                        <img src="${agent.img}" class="card-img" loading="lazy">
+                        <div class="blur-overlay"></div>
+                        <div class="locked-content"><i class="fas fa-camera"></i> 5</div>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-name">${agent.name}, ${agent.age}</div>
+                        <div class="card-status">${agent.online ? 'Online' : 'Away'}</div>
+                    </div>
+                `;
+                container.appendChild(card);
             });
+            
+            // Update credits visual
+            document.getElementById('credit-display').innerText = userCredits;
         }
 
-        function showVipModal() {
-            tg.HapticFeedback.notificationOccurred('warning');
-            tg.showPopup({
-                title: '👑 VIP Content',
-                message: 'This agent sends private photos & videos. Upgrade to VIP or pay 50 Stars to unlock.',
-                buttons: [
-                    {id: 'buy_vip', type: 'default', text: 'Get VIP (590 Stars)'},
-                    {id: 'cancel', type: 'destructive', text: 'Cancel'}
-                ]
-            }, (btnId) => {
-                if (btnId === 'buy_vip') {
-                    tg.sendData(JSON.stringify({ action: 'buy_vip' }));
-                }
-            });
+        // 3. Modal Logic
+        let currentAgent = null;
+
+        function openProfile(agent) {
+            currentAgent = agent;
+            tg.HapticFeedback.selectionChanged();
+            
+            document.getElementById('modal-img').src = agent.img;
+            document.getElementById('modal-name').innerText = `${agent.name}, ${agent.age}`;
+            document.getElementById('modal-bio').innerText = agent.bio;
+            
+            document.getElementById('profile-modal').classList.add('visible');
+            
+            // Setup Connect Button
+            const btn = document.getElementById('connect-btn');
+            btn.onclick = () => {
+                tg.HapticFeedback.impactOccurred('heavy');
+                tg.showConfirm(`Start Private Chat with ${agent.name}? Cost: 1 Credit`, (confirmed) => {
+                    if(confirmed) {
+                        // Send data back to Bot
+                        tg.sendData(JSON.stringify({
+                            action: 'connect',
+                            agent_id: agent.id,
+                            agent_name: agent.name
+                        }));
+                    }
+                });
+            };
         }
 
-        function triggerBotAction(action) {
-            tg.HapticFeedback.impactOccurred('light');
-            tg.sendData(JSON.stringify({ action: action }));
+        function closeModal() {
+            document.getElementById('profile-modal').classList.remove('visible');
         }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
     </script>
 </body>
 </html>
