@@ -3,791 +3,515 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Velvet – Secret Connections</title>
+    <title>Velvet Chat - Premium Connection</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #ff3b30; /* Passion Red */
-            --accent: #ffcc00;  /* Gold */
-            --bg: #0f0f11;      /* Deep Black */
-            --card: #1c1c1e;    /* Dark Gray */
-            --text: #ffffff;
-            --glass: rgba(28, 28, 30, 0.95);
+            --primary: #ff3b5c; /* TikTok/Tinder Red */
+            --gradient: linear-gradient(135deg, #ff3b5c, #ff6b6b);
+            --dark-bg: #0f1115;
+            --card-bg: #1a1d24;
+            --text-main: #ffffff;
+            --text-sub: #8a9aa8;
+            --online: #00e676;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--dark-bg);
+            color: var(--text-main);
             height: 100vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            background-image: radial-gradient(circle at top right, #2a0a0a, #000000);
         }
 
-        /* --- SCREEN CONTAINERS --- */
+        /* --- SCREEN CONTAINER --- */
         .screen {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            padding: 24px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            padding: 20px;
             opacity: 0;
             pointer-events: none;
-            z-index: 0;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            background: var(--dark-bg);
+            z-index: 1;
         }
+
         .screen.active {
             opacity: 1;
             pointer-events: all;
             z-index: 10;
-            transform: scale(1);
-        }
-        .screen.hidden {
-            transform: scale(0.95);
         }
 
-        /* --- SCREEN 1: REGISTRATION --- */
-        .logo {
-            font-size: 32px;
-            font-weight: 900;
-            background: linear-gradient(45deg, var(--primary), #ff6b6b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-            letter-spacing: -1px;
-        }
-        .tagline {
-            color: #8e8e93;
-            font-size: 15px;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-        
-        .input-group {
-            width: 100%;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        .label {
-            font-size: 13px;
-            color: #8e8e93;
-            margin-bottom: 8px;
-            display: block;
-            font-weight: 500;
-        }
-        .gender-select {
-            display: flex;
-            gap: 12px;
-        }
-        .gender-btn {
+        /* --- 1. WELCOME SCREEN --- */
+        .logo-area {
             flex: 1;
-            padding: 16px;
-            background: var(--card);
-            border: 1px solid #333;
-            border-radius: 16px;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-        .gender-btn.selected {
-            background: rgba(255, 59, 48, 0.15);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* --- SCREEN 2: RADAR --- */
-        .radar-container {
-            position: relative;
-            width: 280px;
-            height: 280px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            margin-bottom: 40px;
+            text-align: center;
         }
-        .radar-circle {
-            position: absolute;
-            border: 1px solid rgba(255, 59, 48, 0.3);
-            border-radius: 50%;
-            opacity: 0;
+
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 10px 30px rgba(255, 59, 92, 0.4);
+            margin-bottom: 24px;
             animation: pulse 2s infinite;
-        }
-        .c1 { width: 100%; height: 100%; animation-delay: 0s; }
-        .c2 { width: 75%; height: 75%; animation-delay: 0.5s; }
-        .c3 { width: 50%; height: 50%; animation-delay: 1s; }
-        
-        .user-dot {
-            width: 60px;
-            height: 60px;
-            background: var(--card);
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            z-index: 2;
-            box-shadow: 0 0 20px rgba(255, 59, 48, 0.4);
-        }
-        .status-text {
-            font-size: 18px;
-            font-weight: 600;
-            margin-top: 20px;
-        }
-        .sub-status {
-            color: #8e8e93;
-            font-size: 14px;
-            margin-top: 8px;
-        }
-
-        /* --- SCREEN 3: MATCH FOUND --- */
-        .match-card {
-            background: var(--card);
-            width: 100%;
-            max-width: 340px;
-            border-radius: 28px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            text-align: center;
-            position: relative;
-            border: 1px solid #333;
-        }
-        
-        /* The blurring effect to hide identity */
-        .photo-container {
-            position: relative;
-            width: 100%;
-            height: 320px;
-            overflow: hidden;
-        }
-        .match-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            /* Mild blur to suggest mystery/privacy */
-            filter: blur(8px) brightness(0.8); 
-            transition: filter 0.5s;
-        }
-        /* VIP Badge */
-        .match-badge {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent);
-            border: 1px solid rgba(255, 204, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .match-info {
-            padding: 24px;
-            position: relative;
-        }
-        .match-status-indicator {
-            position: absolute;
-            top: -14px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #4cd964;
-            color: #000;
-            font-size: 12px;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(76, 217, 100, 0.3);
-        }
-
-        .match-title {
-            font-size: 22px;
-            font-weight: 800;
-            margin-bottom: 4px;
-        }
-        .match-details {
-            color: #8e8e93;
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
-        
-        .features-list {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .feature {
-            background: rgba(255,255,255,0.05);
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: #ccc;
-        }
-
-        /* --- BUTTONS --- */
-        .main-btn {
-            background: var(--primary);
-            color: white;
-            width: 100%;
-            padding: 18px;
-            border-radius: 18px;
-            border: none;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 8px 24px rgba(255, 59, 48, 0.3);
-            transition: transform 0.1s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-        .main-btn:active {
-            transform: scale(0.98);
-        }
-        .secondary-btn {
-            background: transparent;
-            color: #8e8e93;
-            border: none;
-            padding: 16px;
-            margin-top: 8px;
-            font-size: 14px;
-            font-weight: 500;
         }
 
         @keyframes pulse {
-            0% { transform: scale(0.5); opacity: 1; border-width: 2px; }
-            100% { transform: scale(1.5); opacity: 0; border-width: 0px; }
-        }
-        
-        /* Privacy shield icon */
-        .shield-icon {
-            color: #4cd964;
-            margin-bottom: 8px;
-            font-size: 24px;
-        }
-    </style>
-</head>
-<body>
-
-    <div id="screen-1" class="screen active">
-        <div class="logo">VELVET</div>
-        <div class="tagline">Anonymous. Discrete. Instant.</div>
-
-        <div class="input-group">
-            <label class="label">I AM A</label>
-            <div class="gender-select">
-                <div class="gender-btn selected" onclick="selectGender(this, 'male')">Man 👨</div>
-                <div class="gender-btn" onclick="selectGender(this, 'female')">Woman 👩</div>
-            </div>
-        </div>
-
-        <div class="input-group">
-            <label class="label">LOOKING FOR</label>
-            <div class="gender-select">
-                <div class="gender-btn" onclick="selectInterest(this, 'male')">Man 👨</div>
-                <div class="gender-btn selected" onclick="selectInterest(this, 'female')">Woman 👩</div>
-            </div>
-        </div>
-        
-        <div style="flex: 1"></div>
-
-        <div style="text-align: center; margin-bottom: 20px; opacity: 0.6; font-size: 12px;">
-            <div class="shield-icon">🛡️</div>
-            100% Private & Anonymous<br>
-            No phone numbers shared.
-        </div>
-
-        <button class="main-btn" onclick="startScanning()">
-            START SEARCH
-        </button>
-    </div>
-
-    <div id="screen-2" class="screen">
-        <div class="radar-container">
-            <div class="radar-circle c1"></div>
-            <div class="radar-circle c2"></div>
-            <div class="radar-circle c3"></div>
-            <div class="user-dot">👤</div>
-        </div>
-        <div class="status-text" id="scan-status">Scanning nearby...</div>
-        <div class="sub-status" id="scan-sub">Searching for active users</div>
-    </div>
-
-    <div id="screen-3" class="screen">
-        <div class="match-card">
-            <div class="photo-container">
-                <div class="match-badge">👑 VIP ONLINE</div>
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop" class="match-photo" id="match-img">
-            </div>
-            
-            <div class="match-info">
-                <div class="match-status-indicator">● ONLINE NOW</div>
-                
-                <div class="match-title" id="match-name">Anonymous User</div>
-                <div class="match-details">📍 <span id="match-dist">1.2 km away</span> • Match: 98%</div>
-
-                <div class="features-list">
-                    <div class="feature">📸 Photos</div>
-                    <div class="feature">💬 Chat</div>
-                    <div class="feature">🎤 Voice</div>
-                </div>
-
-                <button class="main-btn" id="connect-btn">
-                    START SECRET CHAT
-                </button>
-            </div>
-        </div>
-        <button class="secondary-btn" onclick="location.reload()">Skip & Search Again</button>
-    </div>
-
-    <script>
-        // --- LOGIC ---
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-
-        // State
-        let myGender = 'male';
-        let lookingFor = 'female';
-        
-        // Agent Persona (Hidden identity, but consistent routing)
-        // We present this as "Anonymous" initially
-        const agent = {
-            id: 'worker_001',      // Matches your bot database
-            realName: 'Lisa',      // Internal name
-            displayName: 'Jessica', // Name shown if VIP, otherwise "Anonymous"
-            distance: '2.5 km',
-            age: 24
-        };
-
-        // --- UI FUNCTIONS ---
-
-        function selectGender(el, val) {
-            document.querySelectorAll('#screen-1 .input-group:nth-child(2) .gender-btn').forEach(b => b.classList.remove('selected'));
-            el.classList.add('selected');
-            myGender = val;
-            tg.HapticFeedback.selectionChanged();
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 59, 92, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 59, 92, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 59, 92, 0); }
         }
 
-        function selectInterest(el, val) {
-            document.querySelectorAll('#screen-1 .input-group:nth-child(3) .gender-btn').forEach(b => b.classList.remove('selected'));
-            el.classList.add('selected');
-            lookingFor = val;
-            tg.HapticFeedback.selectionChanged();
-        }
+        h1 { font-size: 28px; font-weight: 800; margin-bottom: 10px; }
+        p { color: var(--text-sub); font-size: 15px; line-height: 1.5; max-width: 280px; }
 
-        function switchScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => {
-                s.classList.remove('active');
-                setTimeout(() => s.classList.add('hidden'), 400); // Wait for fade out
-            });
-            
-            const target = document.getElementById(id);
-            target.classList.remove('hidden');
-            // Small delay to allow display:block to apply before opacity
-            setTimeout(() => target.classList.add('active'), 50);
-        }
-
-        function startScanning() {
-            tg.HapticFeedback.impactOccurred('medium');
-            switchScreen('screen-2');
-
-            // Simulate scanning steps
-            const status = document.getElementById('scan-status');
-            const sub = document.getElementById('scan-sub');
-            
-            setTimeout(() => { status.innerText = "Users found: 14..."; tg.HapticFeedback.selectionChanged(); }, 1000);
-            setTimeout(() => { status.innerText = "Filtering active..."; sub.innerText = "Matching preferences"; tg.HapticFeedback.selectionChanged(); }, 2000);
-            setTimeout(() => { status.innerText = "Match found!"; tg.HapticFeedback.notificationOccurred('success'); }, 3000);
-            
-            setTimeout(() => {
-                showMatch();
-            }, 3500);
-        }
-
-        function showMatch() {
-            // Logic: Randomize the "Distance" slightly so it feels real
-            const dist = (Math.random() * 5 + 0.5).toFixed(1);
-            document.getElementById('match-dist').innerText = `${dist} km away`;
-            
-            // Set image based on preference (This is the trick - we always route to the SAME agent, 
-            // but we show a generic alluring image based on what they asked for)
-            const img = document.getElementById('match-img');
-            if(lookingFor === 'female') {
-                img.src = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=800&fit=crop"; // Redhead/Generic Female
-            } else {
-                img.src = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=800&fit=crop"; // Generic Male
-            }
-
-            switchScreen('screen-3');
-        }
-
-        // --- CONNECT BUTTON ACTION ---
-        document.getElementById('connect-btn').addEventListener('click', () => {
-            tg.HapticFeedback.impactOccurred('heavy');
-            
-            // Confirm Dialog
-            tg.showConfirm("Start private chat? 1 credit/message.", (confirm) => {
-                if(confirm) {
-                    // SEND DATA TO BOT
-                    const payload = {
-                        action: 'pay_connect',
-                        worker_id: agent.id, // Always routes to your 1 agent
-                        worker_name: "Anonymous", // Keep it mysterious in the chat title too initially? Or use 'Lisa'
-                        user_gender: myGender,
-                        target_gender: lookingFor
-                    };
-                    
-                    tg.sendData(JSON.stringify(payload));
-                    tg.close();
-                }
-            });
-        });
-
-        // Theme sync
-        if (tg.themeParams.bg_color) {
-            // We override standard theme to keep our "Dark Mode" aesthetic
-            // but we can respect font sizes if needed.
-        }
-    </script>
-</body>
-</html>
-        .agent-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            border: 1px solid var(--glass-border);
-            aspect-ratio: 3/4;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        .agent-img {
+        .btn-large {
+            background: var(--gradient);
+            color: white;
+            border: none;
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
+            padding: 18px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(255, 59, 92, 0.25);
+            transition: transform 0.1s;
+            margin-top: auto;
+            margin-bottom: 20px;
+        }
+        .btn-large:active { transform: scale(0.97); }
+
+        /* --- 2. PREFERENCES (GENDER) --- */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .option-card {
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            padding: 24px;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-card.selected {
+            border-color: var(--primary);
+            background: rgba(255, 59, 92, 0.1);
+        }
+
+        .option-emoji { font-size: 40px; margin-bottom: 12px; display: block; }
+        .option-label { font-weight: 600; font-size: 16px; }
+
+        /* --- 3. RADAR / LOADING --- */
+        .radar-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .radar-circle {
+            width: 200px;
+            height: 200px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .agent-card:active .agent-img { transform: scale(1.05); }
-
-        .agent-overlay {
+        .radar-circle::after {
+            content: '';
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            padding: 12px;
-            padding-top: 40px;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            opacity: 0;
+            animation: radarWave 2s infinite linear;
         }
 
-        .agent-status {
+        @keyframes radarWave {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .status-text { margin-top: 30px; font-weight: 600; color: var(--primary); letter-spacing: 1px; }
+
+        /* --- 4. DISCOVERY FEED (Main App) --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .credits-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 80px; /* Space for fab */
+        }
+        
+        /* Hides scrollbar */
+        .scroll-container::-webkit-scrollbar { display: none; }
+
+        .profile-item {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            transition: transform 0.1s;
+        }
+        
+        .profile-item:active { transform: scale(0.98); background: #252932; }
+
+        .avatar-wrapper {
+            position: relative;
+            margin-right: 16px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            object-fit: cover;
+            border: 2px solid var(--card-bg);
+        }
+
+        .online-dot {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            padding: 4px 8px;
+            bottom: 2px;
+            right: 2px;
+            width: 14px;
+            height: 14px;
+            background: var(--online);
+            border: 2px solid var(--card-bg);
+            border-radius: 50%;
+        }
+
+        .profile-info { flex: 1; }
+        .name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+        .preview { color: var(--text-sub); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+        
+        .action-icon {
+            width: 40px; height: 40px;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            font-weight: 600;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--primary);
         }
 
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            background-color: var(--online);
-            border-radius: 50%;
-            box-shadow: 0 0 5px var(--online);
-        }
-
-        .agent-name { font-weight: 700; font-size: 16px; }
-        .agent-info { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; gap: 4px; }
-
-        /* --- MODAL: PROFILE & ACTION --- */
+        /* --- 5. PROFILE MODAL (Pop-up) --- */
         .modal {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            display: flex;
-            align-items: flex-end;
-            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: flex-end; /* Sheet from bottom */
         }
 
-        .modal-content {
-            background: #1a1a20;
+        .modal.open { display: flex; animation: slideUp 0.3s ease-out; }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-card {
+            background: #1e2229;
             width: 100%;
             border-radius: 24px 24px 0 0;
             padding: 24px;
+            padding-bottom: 40px;
             position: relative;
-            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            border-top: 1px solid var(--glass-border);
         }
 
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        .profile-large-img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50px;
+        .modal-img {
+            width: 100%;
+            height: 300px;
             object-fit: cover;
-            border: 3px solid var(--primary);
-            margin-top: -60px;
-            margin-bottom: 16px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-            background: #2a2a35;
-        }
-
-        .action-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .action-btn {
-            background: #252530;
-            border: 1px solid var(--glass-border);
-            color: white;
-            padding: 16px;
             border-radius: 16px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            position: relative;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .action-btn.primary {
-            background: var(--primary);
-            grid-column: span 2;
-            font-size: 18px;
-            padding: 18px;
-            box-shadow: 0 4px 15px var(--primary-glow);
-            border: none;
+        .modal-name { font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .verified-badge { color: #3897f0; font-size: 18px; }
+        
+        .modal-bio {
+            color: var(--text-sub);
+            margin: 12px 0 24px;
+            line-height: 1.5;
+            font-size: 15px;
         }
 
-        .locked-icon {
+        .modal-tags { display: flex; gap: 8px; margin-bottom: 24px; }
+        .tag { background: rgba(255, 255, 255, 0.1); padding: 6px 12px; border-radius: 8px; font-size: 12px; color: #fff; }
+
+        .chat-btn-container {
+            position: sticky;
+            bottom: 0;
+            padding-top: 10px;
+        }
+
+        .close-modal {
             position: absolute;
-            top: 8px;
-            right: 8px;
-            font-size: 12px;
+            top: 16px; right: 16px;
             background: rgba(0,0,0,0.5);
-            padding: 4px;
-            border-radius: 4px;
-        }
-
-        /* --- TOAST NOTIFICATION --- */
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
+            width: 32px; height: 32px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            z-index: 2000;
+            font-size: 18px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div id="onboardingScreen" class="onboarding-container fade-in">
-        <div class="logo">Velvet.</div>
-        <div class="tagline">Exclusive connections.<br>Select your preference to begin.</div>
+    <div class="screen active" id="screen-welcome">
+        <div class="logo-area">
+            <div class="app-icon">🔥</div>
+            <h1>Secret Chat</h1>
+            <p>Anonymous connection. Safe, private, and instant.</p>
+        </div>
+        <button class="btn-large" onclick="nextScreen('screen-gender')">Start Matching</button>
+    </div>
+
+    <div class="screen" id="screen-gender">
+        <h1>Who are you?</h1>
+        <p>Help us find the right matches for you.</p>
         
-        <div class="gender-select">
-            <div class="gender-btn" onclick="selectGender('male')">
-                <span class="gender-icon">👨</span>
-                <span class="gender-label">I'm a Guy</span>
+        <div class="options-grid">
+            <div class="option-card" onclick="selectGender('male')">
+                <span class="option-emoji">👨</span>
+                <div class="option-label">I'm a Man</div>
             </div>
-            <div class="gender-btn" onclick="selectGender('female')">
-                <span class="gender-icon">👩</span>
-                <span class="gender-label">I'm a Girl</span>
+            <div class="option-card" onclick="selectGender('female')">
+                <span class="option-emoji">👩</span>
+                <div class="option-label">I'm a Woman</div>
             </div>
         </div>
     </div>
 
-    <div id="browseScreen" class="hidden">
-        <div class="app-header">
-            <div style="font-weight:800; font-size: 20px;">Velvet.</div>
-            <div class="vip-badge" onclick="showVipModal()">Get VIP 👑</div>
-        </div>
-
-        <div style="padding: 16px 16px 0; color: var(--text-sub); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">
-            Online Now • <span style="color: var(--online)">12 Active</span>
-        </div>
-
-        <div class="grid-container" id="agentsGrid">
+    <div class="screen" id="screen-looking">
+        <h1>Looking for...</h1>
+        <div class="options-grid">
+            <div class="option-card" onclick="startSearch('girls')">
+                <span class="option-emoji">💃</span>
+                <div class="option-label">Girls</div>
             </div>
-    </div>
-
-    <div id="profileModal" class="modal hidden" onclick="closeModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <img id="modalImg" src="" class="profile-large-img">
-                <div style="background: rgba(0,255,136,0.1); color: var(--online); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 16px;">
-                    ● Online
-                </div>
+            <div class="option-card" onclick="startSearch('boys')">
+                <span class="option-emoji">🕺</span>
+                <div class="option-label">Guys</div>
             </div>
-            
-            <h2 id="modalName" style="margin: 0; font-size: 24px;"></h2>
-            <p id="modalBio" style="color: var(--text-sub); margin: 8px 0 24px; font-size: 15px;"></p>
-
-            <div class="action-grid">
-                <button class="action-btn primary" id="connectBtn">
-                    💬 Start Private Chat
-                </button>
-                
-                <div class="action-btn" onclick="triggerLocked('Send Photo')">
-                    📷 Send Photo
-                    <span class="locked-icon">🔒 VIP</span>
-                </div>
-                <div class="action-btn" onclick="triggerLocked('Voice Note')">
-                    🎙️ Voice Note
-                    <span class="locked-icon">🔒 VIP</span>
-                </div>
+            <div class="option-card" onclick="startSearch('anyone')">
+                <span class="option-emoji">🔥</span>
+                <div class="option-label">Anything Fun</div>
             </div>
-            
-            <p style="text-align: center; color: #555; font-size: 11px; margin-top: 24px;">
-                Strictly confidential. Chat is end-to-end encrypted.
-            </p>
+            <div class="option-card" onclick="startSearch('chat')">
+                <span class="option-emoji">💬</span>
+                <div class="option-label">Just Chat</div>
+            </div>
         </div>
     </div>
 
-    <div id="toast" class="toast">Action locked</div>
+    <div class="screen" id="screen-radar">
+        <div class="radar-container">
+            <div class="radar-circle">
+                <div style="font-size: 40px">📍</div>
+            </div>
+            <div class="status-text" id="radar-text">Scanning nearby...</div>
+        </div>
+    </div>
+
+    <div class="screen" id="screen-feed">
+        <div class="top-bar">
+            <h2>Nearby (12)</h2>
+            <div class="credits-badge">💎 10 Credits</div>
+        </div>
+        
+        <div class="scroll-container" id="feed-list">
+            </div>
+    </div>
+
+    <div class="modal" id="profile-modal">
+        <div class="modal-card">
+            <div class="close-modal" onclick="closeModal()">✕</div>
+            <img src="" class="modal-img" id="modal-img">
+            <div class="modal-name">
+                <span id="modal-name">Name</span>
+                <span class="verified-badge">✓</span>
+            </div>
+            <div class="modal-tags">
+                <div class="tag">📍 <span id="modal-dist">2km</span></div>
+                <div class="tag">🟢 Online</div>
+            </div>
+            <div class="modal-bio" id="modal-bio">
+                Bio goes here...
+            </div>
+            <button class="btn-large" id="connect-btn">
+                💬 Start Private Chat
+            </button>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
 
-        // -- DATA --
-        // Use realistic Unsplash IDs for high-quality "Agent" look
-        const agents = [
-            { id: 1, name: "Sarah, 24", bio: "Loves late night talks and deep connections.", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&q=80" },
-            { id: 2, name: "Chloe, 22", bio: "Fun, flirty, and ready to chat.", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&q=80" },
-            { id: 3, name: "Jessica, 26", bio: "Your personal secret keeper.", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&q=80" },
-            { id: 4, name: "Maya, 23", bio: "Spontaneous and adventurous.", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80" },
-            { id: 5, name: "Elena, 25", bio: "Let's skip the small talk.", img: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500&q=80" },
-            { id: 6, name: "Ruby, 21", bio: "Here to make you smile.", img: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=500&q=80" }
+        // STATE
+        let userGender = '';
+        let lookingFor = '';
+        let currentProfileId = null;
+
+        // FAKE DATA GENERATOR
+        // Since you are the only agent, all profiles act as "skins" for you.
+        const femaleProfiles = [
+            { id: 'f1', name: 'Sarah', age: 24, dist: '1.2km', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500', bio: 'Bored at home 🏠. Want to chat with someone fun? 😉' },
+            { id: 'f2', name: 'Jessica', age: 22, dist: '3km', img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500', bio: 'Love late night talks and sharing photos. Send me a "Hi"' },
+            { id: 'f3', name: 'Elena', age: 27, dist: '500m', img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500', bio: 'Just moved here! Looking for a tour guide... or just a good time.' },
+            { id: 'f4', name: 'Mia', age: 21, dist: '4.5km', img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500', bio: 'Student. Stressing about exams. Distract me? 😈' }
         ];
 
-        let selectedAgent = null;
+        const maleProfiles = [
+            { id: 'm1', name: 'Alex', age: 26, dist: '2km', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500', bio: 'Gym rat by day, chatter by night. Hmu.' },
+            { id: 'm2', name: 'Daniel', age: 29, dist: '1km', img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500', bio: 'Professional vibe checker. Lets skip the small talk.' }
+        ];
 
-        // -- LOGIC --
+        // --- NAVIGATION ---
+        function nextScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
 
         function selectGender(gender) {
-            // Give feedback
-            tg.HapticFeedback.lightImpact();
-            
-            // Fade out onboarding, Fade in Browse
-            document.getElementById('onboardingScreen').style.display = 'none';
-            document.getElementById('browseScreen').classList.remove('hidden');
-            document.getElementById('browseScreen').classList.add('fade-in');
-            
-            renderAgents();
+            userGender = gender;
+            nextScreen('screen-looking');
         }
 
-        function renderAgents() {
-            const grid = document.getElementById('agentsGrid');
-            grid.innerHTML = '';
+        function startSearch(preference) {
+            lookingFor = preference;
+            nextScreen('screen-radar');
             
-            agents.forEach(agent => {
-                const card = document.createElement('div');
-                card.className = 'agent-card';
-                card.onclick = () => openProfile(agent);
-                card.innerHTML = `
-                    <img src="${agent.img}" class="agent-img" loading="lazy">
-                    <div class="agent-status">
-                        <div class="status-dot"></div> Online
+            // Simulate scanning
+            const text = document.getElementById('radar-text');
+            setTimeout(() => { text.innerText = "Analyzing location..."; }, 1000);
+            setTimeout(() => { text.innerText = "Finding active users..."; }, 2500);
+            setTimeout(() => { 
+                renderFeed();
+                nextScreen('screen-feed');
+            }, 4000);
+        }
+
+        // --- FEED RENDERER ---
+        function renderFeed() {
+            const list = document.getElementById('feed-list');
+            list.innerHTML = '';
+
+            // Decide which profiles to show based on preference
+            let profilesToShow = [];
+            if (lookingFor === 'girls') profilesToShow = femaleProfiles;
+            else if (lookingFor === 'boys') profilesToShow = maleProfiles;
+            else profilesToShow = [...femaleProfiles, ...maleProfiles].sort(() => 0.5 - Math.random());
+
+            profilesToShow.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'profile-item';
+                item.onclick = () => openProfile(p);
+                item.innerHTML = `
+                    <div class="avatar-wrapper">
+                        <img src="${p.img}" class="avatar">
+                        <div class="online-dot"></div>
                     </div>
-                    <div class="agent-overlay">
-                        <div class="agent-name">${agent.name}</div>
-                        <div class="agent-info">📍 2km away</div>
+                    <div class="profile-info">
+                        <div class="name">${p.name}, ${p.age}</div>
+                        <div class="preview">📍 ${p.dist} • Click to chat...</div>
                     </div>
+                    <div class="action-icon">💬</div>
                 `;
-                grid.appendChild(card);
+                list.appendChild(item);
             });
         }
 
-        function openProfile(agent) {
-            selectedAgent = agent;
-            tg.HapticFeedback.selectionChanged();
+        // --- PROFILE MODAL ---
+        function openProfile(profile) {
+            currentProfileId = profile.id; // Store who they clicked
             
-            document.getElementById('modalImg').src = agent.img;
-            document.getElementById('modalName').innerText = agent.name;
-            document.getElementById('modalBio').innerText = agent.bio;
+            document.getElementById('modal-img').src = profile.img;
+            document.getElementById('modal-name').innerText = `${profile.name}, ${profile.age}`;
+            document.getElementById('modal-bio').innerText = profile.bio;
+            document.getElementById('modal-dist').innerText = profile.dist;
             
-            document.getElementById('profileModal').classList.remove('hidden');
+            document.getElementById('profile-modal').classList.add('open');
         }
 
-        function closeModal(e) {
-            if (e.target.id === 'profileModal') {
-                document.getElementById('profileModal').classList.add('hidden');
-            }
+        function closeModal() {
+            document.getElementById('profile-modal').classList.remove('open');
         }
 
-        // CONNECT BUTTON (Sends data back to Bot)
-        document.getElementById('connectBtn').addEventListener('click', () => {
-            if(!selectedAgent) return;
-            
+        // --- CONNECT ACTION (SEND DATA TO BOT) ---
+        document.getElementById('connect-btn').addEventListener('click', () => {
             tg.HapticFeedback.impactOccurred('heavy');
             
-            // Send data to Bot to start the chat
-            const data = JSON.stringify({
-                action: 'connect_agent',
-                agent_id: selectedAgent.id,
-                agent_name: selectedAgent.name
-            });
-            
-            tg.sendData(data);
+            // We tell the bot WHICH profile the user "think" they are connecting to.
+            // But in reality, your bot just opens a chat with YOU (the agent).
+            const data = {
+                action: 'connect_request',
+                target_profile_id: currentProfileId,
+                user_gender: userGender,
+                looking_for: lookingFor
+            };
+
+            tg.sendData(JSON.stringify(data));
+            tg.close();
         });
 
-        // LOCKED FEATURES (Upsell)
-        function triggerLocked(feature) {
-            tg.HapticFeedback.notificationOccurred('error');
-            showToast(`⚠️ ${feature} is a VIP feature. Upgrade to unlock!`);
-            
-            // Optional: You could redirect to a payment flow here
-            // tg.sendData(JSON.stringify({ action: 'buy_vip' }));
-        }
-
-        function showVipModal() {
-             // In a real app, this would open a payment modal or send 'buy_vip' action to bot
-             tg.HapticFeedback.lightImpact();
-             tg.sendData(JSON.stringify({ action: 'open_vip_menu' }));
-        }
-
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.style.opacity = '1';
-            setTimeout(() => t.style.opacity = '0', 3000);
-        }
     </script>
 </body>
 </html>
