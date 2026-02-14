@@ -5,162 +5,392 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sync Hearts · Agency</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* (KEEP YOUR EXISTING CSS EXACTLY AS IT WAS) */
-        /* I am omitting the CSS block here to save space, but you must keep 
-           all the styles from your original file for the dark theme to work. */
-           
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ============================
+           THEME & RESET
+           ============================ */
         :root {
-            --tg-bg: var(--tg-theme-bg-color, #0b0e14); 
+            /* Telegram Theme Variables with Fallbacks */
+            --tg-bg: var(--tg-theme-bg-color, #0f1115);
             --tg-text: var(--tg-theme-text-color, #ffffff);
             --tg-hint: var(--tg-theme-hint-color, #8e9aaf);
             --tg-link: var(--tg-theme-link-color, #57a6ff);
-            --tg-button: var(--tg-theme-button-color, #ff3b5c); 
+            --tg-button: var(--tg-theme-button-color, #ff3b5c);
             --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
             --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #1e2229);
+            
+            /* Custom Design System */
             --card-bg: #252a33;
-            --input-bg: #f3f4f6; 
-            --input-text: #1a1d24;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --glass: rgba(30, 34, 41, 0.85);
             --gold: #ffd700;
             --success: #00e676;
-            --border-radius-lg: 24px;
-            --border-radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-md: 16px;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
             font-family: 'Inter', sans-serif;
             background: var(--tg-bg);
             color: var(--tg-text);
-            padding: 20px 16px 80px;
             min-height: 100vh;
+            padding-bottom: 90px; /* Space for bottom nav */
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
         }
 
+        /* UTILITIES */
         .hidden { display: none !important; }
-        .screen { display: block; width: 100%; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .logo { font-weight: 800; font-size: 22px; background: linear-gradient(135deg, #ff6b6b, #ff3b5c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .credit-badge { background: rgba(255, 59, 92, 0.15); padding: 8px 14px; border-radius: 40px; font-size: 14px; font-weight: 700; color: var(--tg-button); display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 59, 92, 0.2); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        .card { background: var(--tg-secondary-bg); border-radius: var(--border-radius-lg); padding: 24px 20px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-        .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        /* ============================
+           HEADER
+           ============================ */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(15, 17, 21, 0.9);
+            backdrop-filter: blur(10px);
+        }
 
-        .input-label { display: block; font-size: 14px; font-weight: 600; color: var(--tg-hint); margin-bottom: 8px; margin-left: 4px; }
-        .input-field { width: 100%; background: var(--input-bg); color: var(--input-text); border: 2px solid transparent; border-radius: var(--border-radius-md); padding: 16px 18px; font-size: 16px; font-weight: 500; outline: none; margin-bottom: 20px; }
-        .input-field:focus { border-color: var(--tg-button); background: #ffffff; }
-        .dropdown { width: 100%; background: var(--input-bg); color: var(--input-text); border-radius: var(--border-radius-md); padding: 16px 18px; font-size: 16px; border: 2px solid transparent; margin-bottom: 20px; }
+        .brand {
+            font-weight: 800;
+            font-size: 20px;
+            background: linear-gradient(135deg, #ff6b6b, #ff3b5c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-        .gender-row { display: flex; gap: 12px; margin-bottom: 24px; }
-        .gender-option { flex: 1; background: var(--card-bg); border: 2px solid rgba(255,255,255,0.05); border-radius: var(--border-radius-md); padding: 16px; text-align: center; font-weight: 600; cursor: pointer; }
-        .gender-option.selected { border-color: var(--tg-button); background: rgba(255, 59, 92, 0.1); color: var(--tg-button); }
+        .credit-badge {
+            background: rgba(255, 59, 92, 0.15);
+            color: var(--tg-button);
+            border: 1px solid rgba(255, 59, 92, 0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-        .btn-primary { background: var(--tg-button); color: var(--tg-button-text); border: none; border-radius: 60px; padding: 18px 24px; font-size: 18px; font-weight: 700; width: 100%; cursor: pointer; transition: transform 0.1s; box-shadow: 0 10px 30px rgba(255, 59, 92, 0.3); }
+        /* ============================
+           SCREENS
+           ============================ */
+        .screen { padding: 0 16px; width: 100%; }
+
+        /* HERO CARD (Login/Register) */
+        .hero-card {
+            background: var(--tg-secondary-bg);
+            border-radius: var(--radius-lg);
+            padding: 30px 20px;
+            text-align: center;
+            margin-top: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .hero-emoji { font-size: 48px; margin-bottom: 16px; display: block; }
+        .hero-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+        .hero-text { color: var(--tg-hint); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+
+        /* INPUTS */
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .input-label { font-size: 13px; font-weight: 600; color: var(--tg-hint); margin-bottom: 8px; display: block; margin-left: 4px; }
+        
+        .input-field, .dropdown {
+            width: 100%;
+            background: var(--input-bg);
+            color: var(--tg-text);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .input-field:focus { border-color: var(--tg-button); background: rgba(255,255,255,0.1); }
+
+        /* GENDER SELECTOR */
+        .gender-row { display: flex; gap: 12px; }
+        .gender-opt {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .gender-opt.selected {
+            background: rgba(255, 59, 92, 0.2);
+            border-color: var(--tg-button);
+            color: var(--tg-button);
+        }
+
+        /* PRIMARY BUTTON */
+        .btn-primary {
+            width: 100%;
+            background: var(--tg-button);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.1s;
+            box-shadow: 0 8px 20px rgba(255, 59, 92, 0.4);
+        }
         .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
 
-        .agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px; }
-        .agent-card { background: var(--tg-secondary-bg); border-radius: var(--border-radius-md); overflow: hidden; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .agent-image-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #333; }
-        .agent-image-container img { width: 100%; height: 100%; object-fit: cover; }
-        .premium-lock { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 4px 8px; border-radius: 12px; font-size: 12px; color: var(--gold); font-weight: 600; display: flex; align-items: center; gap: 4px; }
-        .agent-info { padding: 12px; }
-        .agent-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
-        .agent-location { font-size: 12px; color: var(--tg-hint); margin-bottom: 8px; }
-        .agent-stats { display: flex; gap: 8px; font-size: 11px; color: var(--tg-hint); margin-bottom: 12px; }
-        .stat-tag { background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; }
-        
-        .chat-btn-small { width: 100%; background: rgba(255, 59, 92, 0.1); color: var(--tg-button); border: 1px solid var(--tg-button); padding: 8px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
+        /* ============================
+           AGENT GRID
+           ============================ */
+        .grid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 24px 0 16px;
+        }
+        .section-title { font-size: 18px; font-weight: 700; }
+        .online-count { font-size: 12px; color: var(--success); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .online-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
 
-        .bottom-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(30, 34, 41, 0.95); backdrop-filter: blur(10px); border-radius: 60px; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--tg-hint); gap: 4px; cursor: pointer; }
-        .nav-item.active { color: var(--tg-button); }
+        .agent-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .agent-card {
+            background: var(--tg-secondary-bg);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Image Aspect Ratio Wrapper (3:4) */
+        .img-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 133%; /* 3:4 Aspect Ratio */
+            background: #2a2e35;
+        }
+
+        .img-wrapper img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+
+        /* Card Content */
+        .card-content { padding: 12px; }
+
+        .agent-name { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-bottom: 2px; }
+        .verified-badge { color: var(--tg-link); font-size: 12px; }
+        
+        .agent-meta { font-size: 11px; color: var(--tg-hint); margin-bottom: 10px; display: flex; justify-content: space-between; }
+
+        .card-actions { display: flex; gap: 8px; }
+
+        .btn-chat {
+            flex: 1;
+            background: rgba(255, 59, 92, 0.1);
+            color: var(--tg-button);
+            border: 1px solid var(--tg-button);
+            padding: 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        .btn-gift {
+            width: 36px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* ============================
+           BOTTOM NAV
+           ============================ */
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 400px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 60px;
+            padding: 10px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--tg-hint); font-size: 10px; gap: 4px;
+            transition: 0.2s; cursor: pointer;
+        }
         .nav-item i { font-size: 20px; font-style: normal; }
+        .nav-item.active { color: var(--tg-button); transform: translateY(-2px); }
+
+        /* LOADING SPINNER */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--tg-button);
+            border-radius: 50%;
+            width: 30px; height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 40px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     </style>
 </head>
 <body>
 
-    <div class="app-header">
-        <span class="logo">✨ Sync Hearts</span>
-        <div class="credit-badge" id="headerCreditBalance">
-            <span>💎</span>
-            <span id="creditCount">0</span>
+    <header class="app-header">
+        <div class="brand">
+            <span>✨</span> Sync Hearts
         </div>
-    </div>
+        <div class="credit-badge">
+            <span>💎</span> <span id="creditDisplay">0</span>
+        </div>
+    </header>
 
-    <div id="screenLogin" class="screen hidden">
-        <div class="card" style="text-align: center; padding: 40px 20px;">
-            <div style="font-size: 60px; margin-bottom: 20px;">👋</div>
-            <h2 style="margin-bottom: 10px;">Welcome Back!</h2>
-            <p style="color: var(--tg-hint); margin-bottom: 30px;">
-                You are logged in as <b id="loginUsername">User</b>.<br>
-                Your balance is saved.
+    <div id="screenLogin" class="screen hidden fade-in">
+        <div class="hero-card">
+            <span class="hero-emoji">👋</span>
+            <h2 class="hero-title">Welcome Back!</h2>
+            <p class="hero-text">
+                Logged in as <b id="loginUsername" style="color:white">User</b>.<br>
+                Ready to meet someone new?
             </p>
-            <button class="btn-primary" id="btnLogin">
+            <button class="btn-primary" id="btnAutoLogin">
                 🚀 Continue to Agency
             </button>
         </div>
     </div>
 
-    <div id="screenRegister" class="screen hidden">
-        <div class="card">
-            <div class="section-title"><span>📋 Create Profile</span></div>
-            <p style="color: var(--success); font-size: 14px; margin-bottom: 20px; background: rgba(0, 230, 118, 0.1); padding: 10px; border-radius: 8px;">
-                🎁 <b>Bonus:</b> Receive 50 Free Coins upon registration!
-            </p>
-
-            <label class="input-label">Your Age</label>
-            <input type="number" id="ageInput" class="input-field" placeholder="e.g. 25" min="18">
-
-            <label class="input-label">Country</label>
-            <select id="countrySelect" class="dropdown">
-                <option value="" disabled selected>Select Country</option>
-            </select>
-
-            <label class="input-label">State / City</label>
-            <input type="text" id="stateInput" class="input-field" placeholder="e.g. California">
-
-            <label class="input-label">I'm looking for...</label>
-            <div class="gender-row">
-                <div class="gender-option" onclick="selectGender(this, 'female')">💃 Women</div>
-                <div class="gender-option" onclick="selectGender(this, 'male')">🕺 Men</div>
+    <div id="screenRegister" class="screen hidden fade-in">
+        <div class="hero-card" style="text-align: left; padding: 24px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 class="hero-title">Create Profile</h2>
+                <p style="font-size: 13px; color: var(--success); background: rgba(0,230,118,0.1); padding: 8px; border-radius: 8px; display: inline-block;">
+                    🎁 <b>Bonus:</b> Get 50 Free Coins
+                </p>
             </div>
+
+            <div class="form-group">
+                <label class="input-label">Your Age</label>
+                <input type="number" id="ageInput" class="input-field" placeholder="e.g. 24" inputmode="numeric">
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">I'm looking for...</label>
+                <div class="gender-row">
+                    <div class="gender-opt" onclick="selectGender(this, 'female')">Women 💃</div>
+                    <div class="gender-opt" onclick="selectGender(this, 'male')">Men 🕺</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">Location</label>
+                <select id="countrySelect" class="dropdown">
+                    <option value="" disabled selected>Select Country</option>
+                    <option value="USA">United States</option>
+                    <option value="UK">United Kingdom</option>
+                    <option value="EU">Europe</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <button class="btn-primary" id="btnCompleteReg">
+                ✅ Create & Claim Coins
+            </button>
+            <p style="text-align:center; font-size:11px; color:var(--tg-hint); margin-top:16px; opacity:0.6;">
+                18+ Only • Secure • Private
+            </p>
         </div>
-        <button class="btn-primary" id="btnCompleteReg">✅ Save & Claim 50 Coins</button>
     </div>
 
-    <div id="screenAgents" class="screen hidden">
-        <div class="section-title">
-            <span>🔥 Elite Companions</span>
-            <span id="onlineCount" style="font-size: 12px; color: var(--tg-hint); margin-left: auto;">Online: 0</span>
+    <div id="screenAgents" class="screen hidden fade-in">
+        <div class="grid-header">
+            <div class="section-title">🔥 Trending Now</div>
+            <div class="online-count"><div class="online-dot"></div> 12 Online</div>
         </div>
 
         <div id="agentGridContainer" class="agent-grid">
-            <div style="text-align:center; grid-column:span 2; color:#888; padding:20px;">
-                Loading models from server...
-            </div>
+            <div class="loader"></div> </div>
+        
+        <div style="height: 100px;"></div>
+    </div>
+
+    <nav class="bottom-nav hidden" id="mainNav">
+        <div class="nav-item active" data-tab="browse">
+            <i>👥</i> <span>Browse</span>
         </div>
-
-        <div style="height: 60px;"></div>
-    </div>
-
-    <div class="bottom-nav hidden" id="mainNav">
-        <div class="nav-item active" data-tab="browse"><i>👥</i><span>Browse</span></div>
-        <div class="nav-item" data-tab="chat"><i>💬</i><span>Chats</span></div>
-        <div class="nav-item" data-tab="wallet"><i>💎</i><span>Buy</span></div>
-        <div class="nav-item" data-tab="profile"><i>👤</i><span>Profile</span></div>
-    </div>
+        <div class="nav-item" data-tab="chats">
+            <i>💬</i> <span>Chats</span>
+        </div>
+        <div class="nav-item" data-tab="wallet">
+            <i>💎</i> <span>Add</span>
+        </div>
+        <div class="nav-item" data-tab="profile">
+            <i>👤</i> <span>Me</span>
+        </div>
+    </nav>
 
     <script src="app.js"></script>
+    
     <script>
-        function selectGender(element, value) {
-            document.querySelectorAll('.gender-option').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-            window.selectedLookingFor = value;
+        window.selectedLookingFor = null;
+        function selectGender(el, val) {
+            document.querySelectorAll('.gender-opt').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+            window.selectedLookingFor = val;
         }
     </script>
 </body>
-        </html>
+</html>
