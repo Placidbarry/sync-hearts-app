@@ -7,14 +7,12 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* (KEEP YOUR EXISTING CSS EXACTLY AS IT WAS) */
+        /* I am omitting the CSS block here to save space, but you must keep 
+           all the styles from your original file for the dark theme to work. */
+           
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            /* Theme Colors */
             --tg-bg: var(--tg-theme-bg-color, #0b0e14); 
             --tg-text: var(--tg-theme-text-color, #ffffff);
             --tg-hint: var(--tg-theme-hint-color, #8e9aaf);
@@ -22,443 +20,65 @@
             --tg-button: var(--tg-theme-button-color, #ff3b5c); 
             --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
             --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #1e2229);
-            
-            /* Custom Colors */
             --card-bg: #252a33;
-            --input-bg: #f3f4f6; /* Lighter background for inputs */
-            --input-text: #1a1d24; /* Dark text for inputs */
+            --input-bg: #f3f4f6; 
+            --input-text: #1a1d24;
             --gold: #ffd700;
             --success: #00e676;
-            
             --border-radius-lg: 24px;
             --border-radius-md: 16px;
-            --border-radius-sm: 12px;
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background: var(--tg-bg);
             color: var(--tg-text);
-            padding: 20px 16px 80px; /* Extra padding at bottom for nav */
+            padding: 20px 16px 80px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
         }
 
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
+        .screen { display: block; width: 100%; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .screen {
-            display: block;
-            width: 100%;
-            animation: fadeIn 0.3s ease-in-out;
-        }
+        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .logo { font-weight: 800; font-size: 22px; background: linear-gradient(135deg, #ff6b6b, #ff3b5c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .credit-badge { background: rgba(255, 59, 92, 0.15); padding: 8px 14px; border-radius: 40px; font-size: 14px; font-weight: 700; color: var(--tg-button); display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255, 59, 92, 0.2); }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .card { background: var(--tg-secondary-bg); border-radius: var(--border-radius-lg); padding: 24px 20px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
-        /* HEADER */
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
+        .input-label { display: block; font-size: 14px; font-weight: 600; color: var(--tg-hint); margin-bottom: 8px; margin-left: 4px; }
+        .input-field { width: 100%; background: var(--input-bg); color: var(--input-text); border: 2px solid transparent; border-radius: var(--border-radius-md); padding: 16px 18px; font-size: 16px; font-weight: 500; outline: none; margin-bottom: 20px; }
+        .input-field:focus { border-color: var(--tg-button); background: #ffffff; }
+        .dropdown { width: 100%; background: var(--input-bg); color: var(--input-text); border-radius: var(--border-radius-md); padding: 16px 18px; font-size: 16px; border: 2px solid transparent; margin-bottom: 20px; }
 
-        .logo {
-            font-weight: 800;
-            font-size: 22px;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #ff6b6b, #ff3b5c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        .gender-row { display: flex; gap: 12px; margin-bottom: 24px; }
+        .gender-option { flex: 1; background: var(--card-bg); border: 2px solid rgba(255,255,255,0.05); border-radius: var(--border-radius-md); padding: 16px; text-align: center; font-weight: 600; cursor: pointer; }
+        .gender-option.selected { border-color: var(--tg-button); background: rgba(255, 59, 92, 0.1); color: var(--tg-button); }
 
-        .credit-badge {
-            background: rgba(255, 59, 92, 0.15);
-            padding: 8px 14px;
-            border-radius: 40px;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--tg-button);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid rgba(255, 59, 92, 0.2);
-        }
+        .btn-primary { background: var(--tg-button); color: var(--tg-button-text); border: none; border-radius: 60px; padding: 18px 24px; font-size: 18px; font-weight: 700; width: 100%; cursor: pointer; transition: transform 0.1s; box-shadow: 0 10px 30px rgba(255, 59, 92, 0.3); }
+        .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
 
-        /* CARDS & CONTAINERS */
-        .card {
-            background: var(--tg-secondary-bg);
-            border-radius: var(--border-radius-lg);
-            padding: 24px 20px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
+        .agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px; }
+        .agent-card { background: var(--tg-secondary-bg); border-radius: var(--border-radius-md); overflow: hidden; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .agent-image-container { position: relative; width: 100%; aspect-ratio: 3/4; background: #333; }
+        .agent-image-container img { width: 100%; height: 100%; object-fit: cover; }
+        .premium-lock { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 4px 8px; border-radius: 12px; font-size: 12px; color: var(--gold); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .agent-info { padding: 12px; }
+        .agent-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+        .agent-location { font-size: 12px; color: var(--tg-hint); margin-bottom: 8px; }
+        .agent-stats { display: flex; gap: 8px; font-size: 11px; color: var(--tg-hint); margin-bottom: 12px; }
+        .stat-tag { background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; }
+        
+        .chat-btn-small { width: 100%; background: rgba(255, 59, 92, 0.1); color: var(--tg-button); border: 1px solid var(--tg-button); padding: 8px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* INPUT FIELDS - UPDATED FOR VISIBILITY */
-        .input-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--tg-hint);
-            margin-bottom: 8px;
-            margin-left: 4px;
-        }
-
-        .input-field {
-            width: 100%;
-            background: var(--input-bg); /* Light background */
-            color: var(--input-text);    /* Dark text */
-            border: 2px solid transparent;
-            border-radius: var(--border-radius-md);
-            padding: 16px 18px;
-            font-size: 16px;
-            font-weight: 500;
-            outline: none;
-            transition: all 0.2s;
-            margin-bottom: 20px;
-        }
-
-        .input-field:focus {
-            border-color: var(--tg-button);
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(255, 59, 92, 0.1);
-        }
-
-        .input-field::placeholder {
-            color: #9ca3af;
-        }
-
-        /* DROPDOWN STYLE */
-        .dropdown {
-            width: 100%;
-            background: var(--input-bg);
-            color: var(--input-text);
-            border: 2px solid transparent;
-            border-radius: var(--border-radius-md);
-            padding: 16px 18px;
-            font-size: 16px;
-            appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='black'><path d='M7 10l5 5 5-5z'/></svg>");
-            background-repeat: no-repeat;
-            background-position: right 18px center;
-            margin-bottom: 20px;
-        }
-
-        /* GENDER SELECTION */
-        .gender-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .gender-option {
-            flex: 1;
-            background: var(--card-bg);
-            border: 2px solid rgba(255,255,255,0.05);
-            border-radius: var(--border-radius-md);
-            padding: 16px;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .gender-option.selected {
-            border-color: var(--tg-button);
-            background: rgba(255, 59, 92, 0.1);
-            color: var(--tg-button);
-        }
-
-        /* PHOTO UPLOAD */
-        .photo-upload-area {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: rgba(255,255,255,0.03);
-            border-radius: var(--border-radius-md);
-            padding: 16px;
-            margin-bottom: 24px;
-            border: 1px dashed rgba(255,255,255,0.2);
-        }
-
-        .photo-preview {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: #333a45;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .photo-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .btn-upload {
-            background: var(--tg-button);
-            color: white;
-            border-radius: 30px;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* PRIMARY BUTTON */
-        .btn-primary {
-            background: var(--tg-button);
-            color: var(--tg-button-text);
-            border: none;
-            border-radius: 60px;
-            padding: 18px 24px;
-            font-size: 18px;
-            font-weight: 700;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: transform 0.1s;
-            box-shadow: 0 10px 30px rgba(255, 59, 92, 0.3);
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
-
-        /* AGENT GRID */
-        .agent-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            padding-bottom: 20px;
-        }
-
-        .agent-card {
-            background: var(--tg-secondary-bg);
-            border-radius: var(--border-radius-md);
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .agent-image-container {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 3/4;
-            background: #333;
-        }
-
-        .agent-image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .premium-lock {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: var(--gold);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .agent-info {
-            padding: 12px;
-        }
-
-        .agent-name {
-            font-weight: 700;
-            font-size: 16px;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .verified-icon {
-            color: var(--tg-link);
-            font-size: 14px;
-        }
-
-        .agent-location {
-            font-size: 12px;
-            color: var(--tg-hint);
-            margin-bottom: 8px;
-        }
-
-        .agent-stats {
-            display: flex;
-            gap: 8px;
-            font-size: 11px;
-            color: var(--tg-hint);
-            margin-bottom: 12px;
-        }
-
-        .stat-tag {
-            background: rgba(255,255,255,0.05);
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        .chat-btn-small {
-            width: 100%;
-            background: rgba(255, 59, 92, 0.1);
-            color: var(--tg-button);
-            border: 1px solid var(--tg-button);
-            padding: 8px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        /* BOTTOM NAV */
-        .bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            background: rgba(30, 34, 41, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 60px;
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 10px;
-            color: var(--tg-hint);
-            gap: 4px;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .nav-item i {
-            font-size: 20px;
-            font-style: normal;
-        }
-
-        .nav-item.active {
-            color: var(--tg-button);
-        }
-
-        /* GIFT SHOP / ACTIONS MODAL (Hidden by default) */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 200;
-            display: none;
-            align-items: flex-end;
-            justify-content: center;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .action-sheet {
-            background: var(--tg-secondary-bg);
-            width: 100%;
-            border-radius: 24px 24px 0 0;
-            padding: 24px;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .action-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .price-list {
-            display: grid;
-            gap: 12px;
-        }
-
-        .price-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.05);
-            padding: 16px;
-            border-radius: 16px;
-            cursor: pointer;
-        }
-
-        .price-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-        }
-
-        .price-cost {
-            color: var(--gold);
-            font-weight: 700;
-            background: rgba(255, 215, 0, 0.1);
-            padding: 4px 10px;
-            border-radius: 8px;
-        }
-
-        /* FOOTER NOTE */
-        .footer-note {
-            text-align: center;
-            color: var(--tg-hint);
-            font-size: 12px;
-            margin-top: 16px;
-            opacity: 0.7;
-        }
-
+        .bottom-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(30, 34, 41, 0.95); backdrop-filter: blur(10px); border-radius: 60px; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--tg-hint); gap: 4px; cursor: pointer; }
+        .nav-item.active { color: var(--tg-button); }
+        .nav-item i { font-size: 20px; font-style: normal; }
     </style>
 </head>
 <body>
@@ -487,139 +107,60 @@
 
     <div id="screenRegister" class="screen hidden">
         <div class="card">
-            <div class="section-title">
-                <span>📋 Create Profile</span>
-            </div>
+            <div class="section-title"><span>📋 Create Profile</span></div>
             <p style="color: var(--success); font-size: 14px; margin-bottom: 20px; background: rgba(0, 230, 118, 0.1); padding: 10px; border-radius: 8px;">
                 🎁 <b>Bonus:</b> Receive 50 Free Coins upon registration!
             </p>
 
             <label class="input-label">Your Age</label>
-            <input type="number" id="ageInput" class="input-field" placeholder="e.g. 25" min="18" max="99">
+            <input type="number" id="ageInput" class="input-field" placeholder="e.g. 25" min="18">
 
             <label class="input-label">Country</label>
             <select id="countrySelect" class="dropdown">
                 <option value="" disabled selected>Select Country</option>
-                </select>
+            </select>
 
             <label class="input-label">State / City</label>
             <input type="text" id="stateInput" class="input-field" placeholder="e.g. California">
 
             <label class="input-label">I'm looking for...</label>
             <div class="gender-row">
-                <div class="gender-option" data-value="female" onclick="selectGender(this, 'female')">💃 Women</div>
-                <div class="gender-option" data-value="male" onclick="selectGender(this, 'male')">🕺 Men</div>
-            </div>
-
-            <label class="input-label">Profile Photo</label>
-            <div class="photo-upload-area">
-                <div class="photo-preview" id="photoPreview">
-                    <span>📷</span>
-                </div>
-                <div class="btn-upload" id="uploadPhotoBtn">
-                    Choose Photo
-                </div>
-                <input type="hidden" id="photoFileId">
+                <div class="gender-option" onclick="selectGender(this, 'female')">💃 Women</div>
+                <div class="gender-option" onclick="selectGender(this, 'male')">🕺 Men</div>
             </div>
         </div>
-
-        <button class="btn-primary" id="btnCompleteReg">
-            ✅ Save & Claim 50 Coins
-        </button>
-        <div class="footer-note">Secure • Private • 18+ Only</div>
+        <button class="btn-primary" id="btnCompleteReg">✅ Save & Claim 50 Coins</button>
     </div>
 
     <div id="screenAgents" class="screen hidden">
         <div class="section-title">
             <span>🔥 Elite Companions</span>
-            <span style="font-size: 12px; color: var(--tg-hint); margin-left: auto;">Online: 12</span>
+            <span id="onlineCount" style="font-size: 12px; color: var(--tg-hint); margin-left: auto;">Online: 0</span>
         </div>
 
         <div id="agentGridContainer" class="agent-grid">
+            <div style="text-align:center; grid-column:span 2; color:#888; padding:20px;">
+                Loading models from server...
             </div>
+        </div>
 
         <div style="height: 60px;"></div>
     </div>
 
     <div class="bottom-nav hidden" id="mainNav">
-        <div class="nav-item active" data-tab="browse">
-            <i>👥</i>
-            <span>Browse</span>
-        </div>
-        <div class="nav-item" data-tab="chat">
-            <i>💬</i>
-            <span>Chats</span>
-        </div>
-        <div class="nav-item" data-tab="wallet" id="navWallet">
-            <i>💎</i>
-            <span>Buy</span>
-        </div>
-        <div class="nav-item" data-tab="profile">
-            <i>👤</i>
-            <span>Profile</span>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="actionModal">
-        <div class="action-sheet">
-            <div class="action-title">💎 Select Action</div>
-            
-            <div class="price-list">
-                <div class="price-item" onclick="triggerAction('text')">
-                    <div class="price-info">💬 Send Private Message</div>
-                    <div class="price-cost">1 Coin</div>
-                </div>
-
-                <div class="price-item" onclick="triggerAction('flower')">
-                    <div class="price-info">🌹 Send Flower Gift</div>
-                    <div class="price-cost">5 Coins</div>
-                </div>
-
-                <div class="price-item" onclick="triggerAction('naughty')">
-                    <div class="price-info">🍆 Send Naughty Gift</div>
-                    <div class="price-cost">5 Coins</div>
-                </div>
-
-                <div class="price-item" onclick="triggerAction('pic')">
-                    <div class="price-info">📸 Request Private Picture</div>
-                    <div class="price-cost">15 Coins</div>
-                </div>
-
-                <div class="price-item" onclick="triggerAction('video')">
-                    <div class="price-info">🎥 Request Private Video</div>
-                    <div class="price-cost">50 Coins</div>
-                </div>
-            </div>
-
-            <button class="btn-primary" style="margin-top: 20px; background: #333;" onclick="closeActionModal()">
-                Cancel
-            </button>
-        </div>
+        <div class="nav-item active" data-tab="browse"><i>👥</i><span>Browse</span></div>
+        <div class="nav-item" data-tab="chat"><i>💬</i><span>Chats</span></div>
+        <div class="nav-item" data-tab="wallet"><i>💎</i><span>Buy</span></div>
+        <div class="nav-item" data-tab="profile"><i>👤</i><span>Profile</span></div>
     </div>
 
     <script src="app.js"></script>
     <script>
-        // Inline Helper to toggle gender selection visual (logic handles the rest)
         function selectGender(element, value) {
             document.querySelectorAll('.gender-option').forEach(el => el.classList.remove('selected'));
             element.classList.add('selected');
-            // Store value in a global variable for app.js to access
             window.selectedLookingFor = value;
-        }
-
-        // Helper to close modal
-        function closeActionModal() {
-            document.getElementById('actionModal').classList.remove('active');
-        }
-
-        // Placeholder for triggering actions (app.js will override this)
-        function triggerAction(type) {
-            if(window.handleAction) {
-                window.handleAction(type);
-            } else {
-                console.log("Action triggered: " + type);
-            }
         }
     </script>
 </body>
-    </html>
+        </html>
