@@ -1,16 +1,16 @@
 // ====================================================================
-// APP.JS - Sync Hearts Agency Frontend Logic (Dynamic Edition)
+// APP.JS - Sync Hearts Agency Frontend Logic (Dynamic API Edition)
 // ====================================================================
 
+// 1. INITIALIZATION & CONFIGURATION
 const tg = window.Telegram.WebApp;
-tg.expand();
+tg.expand(); // Full screen
 tg.enableClosingConfirmation();
 
-// CONFIGURATION
-// ⚠️ CHANGE THIS TO YOUR LIVE SERVER URL WHEN DEPLOYING
-// Localhost for testing: http://localhost:8080
-// Production example: https://sync-hearts-bot.onrender.com
+// IMPORTANT: Replace this with your actual Render/Server URL when deployed
+// For local testing, keep localhost.
 const API_BASE_URL = 'http://localhost:8080'; 
+// const API_BASE_URL = 'https://your-app-name.onrender.com';
 
 // Global State
 let user = {
@@ -20,43 +20,135 @@ let user = {
 };
 
 // ====================================================================
-// LIFECYCLE
+// 2. LIFECYCLE & NAVIGATION
 // ====================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     loadUserState();
-    populateCountryDropdown();
+    loadAgents(); // NEW: Fetch from API
     setupNavigation();
-    
-    // Fetch agents from the bot's API immediately
-    loadAgentsFromAPI();
 });
 
+// Check Persistence
+function loadUserState() {
+    const savedUser = localStorage.getItem('syncHeartsUser');
+    
+    if (savedUser) {
+        user = JSON.parse(savedUser);
+        console.log("Loaded user:", user);
+        
+        // Update UI
+        const nameDisplay = document.getElementById('loginUsername');
+        if (nameDisplay) nameDisplay.innerText = user.data.firstName || 'User';
+        
+        updateCreditDisplay();
+        showScreen('screenLogin');
+    } else {
+        // New User
+        showScreen('screenRegister');
+    }
+}
+
+// Screen Switcher
+function showScreen(screenId) {
+    // Hide all screens
+    document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.bottom-nav').forEach(el => el.classList.add('hidden'));
+    
+    // Show target
+    const target = document.getElementById(screenId);
+    if(target) target.classList.remove('hidden');
+
+    // Show Nav bar only on main screens (Agents list)
+    if(screenId === 'screenAgents') {
+        document.getElementById('mainNav').classList.remove('hidden');
+    }
+}
+
+// "Welcome Back" Button Logic
+const btnAutoLogin = document.getElementById('btnAutoLogin');
+if(btnAutoLogin) {
+    btnAutoLogin.addEventListener('click', () => {
+        showScreen('screenAgents');
+    });
+}
+
+// Update Header Credits
+function updateCreditDisplay() {
+    const display = document.getElementById('creditDisplay');
+    if(display) display.innerText = user.credits;
+}
+
 // ====================================================================
-// DATA FETCHING (NEW)
+// 3. REGISTRATION LOGIC
 // ====================================================================
 
-async function loadAgentsFromAPI() {
+const btnCompleteReg = document.getElementById('btnCompleteReg');
+if(btnCompleteReg) {
+    btnCompleteReg.addEventListener('click', () => {
+        // 1. Validate
+        const age = document.getElementById('ageInput').value;
+        const country = document.getElementById('countrySelect').value;
+        const lookingFor = window.selectedLookingFor;
+
+        if(!age || !country || !lookingFor) {
+            tg.showAlert("⚠️ Please fill in all fields.");
+            return;
+        }
+
+        if(age < 18) {
+            tg.showAlert("⛔ You must be 18+.");
+            return;
+        }
+
+        // 2. Create User State
+        const telegramUser = tg.initDataUnsafe?.user || {};
+        user.registered = true;
+        user.credits = 50; // Visual only, backend verifies this
+        user.data = {
+            telegramId: telegramUser.id,
+            firstName: telegramUser.first_name || 'User',
+            age: age,
+            country: country,
+            lookingFor: lookingFor
+        };
+
+        // 3. Save & Sync
+        localStorage.setItem('syncHeartsUser', JSON.stringify(user));
+        
+        // Send to Bot (Triggers DB update + 50 credits)
+        tg.sendData(JSON.stringify({
+            action: 'register_new_user',
+            user_data: user.data
+        }));
+
+        // Note: sendData closes the app usually. If testing in browser:
+        updateCreditDisplay();
+        showScreen('screenAgents');
+    });
+}
+
+// ====================================================================
+// 4. DYNAMIC AGENT LOADING (API)
+// ====================================================================
+
+async function loadAgents() {
     const container = document.getElementById('agentGridContainer');
     
     try {
-        // Fetch data from the bot
+        // Fetch from your Node.js bot
         const response = await fetch(`${API_BASE_URL}/api/agents`);
-        
-        if (!response.ok) throw new Error("Network response was not ok");
+        if (!response.ok) throw new Error("API Error");
         
         const agents = await response.json();
-        
-        // Update UI
-        document.getElementById('onlineCount').innerText = `Online: ${agents.length}`;
         renderAgentGrid(agents);
-        
-    } catch (error) {
-        console.error("Failed to load agents:", error);
+
+    } catch (e) {
+        console.error("Load failed:", e);
         container.innerHTML = `
-            <div style="grid-column: span 2; text-align: center; padding: 20px; color: #ff3b5c;">
-                <p>⚠️ Could not connect to agency server.</p>
-                <button onclick="loadAgentsFromAPI()" class="chat-btn-small" style="margin-top:10px;">Retry Connection</button>
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--tg-hint);">
+                <p>⚠️ Could not load models.</p>
+                <button onclick="loadAgents()" class="btn-chat" style="margin-top:10px; width:auto;">Retry</button>
             </div>
         `;
     }
@@ -64,38 +156,35 @@ async function loadAgentsFromAPI() {
 
 function renderAgentGrid(agents) {
     const container = document.getElementById('agentGridContainer');
-    container.innerHTML = ''; // Clear loading text
+    container.innerHTML = ''; // Clear loader
 
-    if (agents.length === 0) {
-        container.innerHTML = `<div style="grid-column: span 2; text-align: center; color: #888;">No models found.</div>`;
+    if(agents.length === 0) {
+        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px;">No models available yet.</div>`;
         return;
     }
 
     agents.forEach(agent => {
         const card = document.createElement('div');
-        card.className = 'agent-card';
-        
-        // Use photo from API or fallback
-        const photoUrl = agent.photo || 'https://placehold.co/400x500';
+        card.className = 'agent-card fade-in';
         
         card.innerHTML = `
-            <div class="agent-image-container">
-                <img src="${photoUrl}" alt="${agent.name}" onerror="this.src='https://placehold.co/400x500?text=No+Image'">
-                <div class="premium-lock">🔒 VIP</div>
+            <div class="img-wrapper">
+                <img src="${agent.photo}" alt="${agent.name}" onerror="this.src='https://placehold.co/400x500?text=No+Image'">
             </div>
-            <div class="agent-info">
-                <div class="agent-name">${agent.name}, ${agent.age} <span class="verified-icon">✅</span></div>
-                <div class="agent-location">📍 ${agent.location}</div>
-                <div class="agent-stats">
-                    <span class="stat-tag">⭐ ${agent.stats.rating}</span>
-                    <span class="stat-tag">💬 ${agent.stats.chats}</span>
+            <div class="card-content">
+                <div class="agent-name">
+                    ${agent.name}, ${agent.age} 
+                    <span class="verified-badge">✅</span>
                 </div>
-                
-                <div style="display: flex; gap: 8px;">
-                    <button class="chat-btn-small" style="background: var(--tg-button); color: white; flex: 1;" 
-                        onclick="selectAgent('${agent.id}', '${agent.name}')">
-                        💬 Chat
+                <div class="agent-meta">
+                    <span>📍 ${agent.location}</span>
+                    <span>⭐ 5.0</span>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-chat" onclick="selectAgent('${agent.id}', '${agent.name}')">
+                        💬 Chat Now
                     </button>
+                    <button class="btn-gift">🎁</button>
                 </div>
             </div>
         `;
@@ -104,126 +193,52 @@ function renderAgentGrid(agents) {
 }
 
 // ====================================================================
-// ACTIONS
+// 5. ACTIONS & NAVIGATION
 // ====================================================================
 
-// Select Agent -> Tell Bot -> Bot Opens Chat
-window.selectAgent = function(agentId, agentName) {
+// Triggered when user clicks "Chat Now"
+window.selectAgent = function(id, name) {
+    // Haptic Feedback
     tg.HapticFeedback.impactOccurred('medium');
 
+    // Send selection to Bot
     const payload = {
-        action: 'select_agent', // Matched with bot.js logic
-        agent_id: agentId,
-        agent_name: agentName
+        action: 'select_agent',
+        agent_id: id,
+        agent_name: name
     };
     
-    // Send data to Telegram Bot and close WebApp
+    // This sends data to bot.js and closes the WebApp
     tg.sendData(JSON.stringify(payload));
 };
-
-// ====================================================================
-// USER STATE & REGISTRATION
-// ====================================================================
-
-function loadUserState() {
-    const savedUser = localStorage.getItem('syncHeartsUser');
-    if (savedUser) {
-        user = JSON.parse(savedUser);
-        document.getElementById('loginUsername').innerText = user.data.firstName || 'User';
-        showScreen('screenLogin');
-        
-        // Login Button Logic
-        document.getElementById('btnLogin').onclick = () => {
-            showScreen('screenAgents');
-        };
-    } else {
-        showScreen('screenRegister');
-    }
-    updateCreditDisplay();
-}
-
-function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('.bottom-nav').forEach(el => el.classList.add('hidden'));
-    
-    const target = document.getElementById(screenId);
-    if(target) target.classList.remove('hidden');
-
-    if(screenId === 'screenAgents') {
-        document.getElementById('mainNav').classList.remove('hidden');
-    }
-}
-
-function populateCountryDropdown() {
-    const countries = ["United States", "United Kingdom", "Canada", "Australia", "Germany", "France", "Spain", "Brazil", "India", "Nigeria"];
-    const select = document.getElementById('countrySelect');
-    countries.forEach(c => {
-        const option = document.createElement('option');
-        option.value = c;
-        option.innerText = c;
-        select.appendChild(option);
-    });
-}
-
-// Registration Button
-document.getElementById('btnCompleteReg').addEventListener('click', () => {
-    const age = document.getElementById('ageInput').value;
-    const country = document.getElementById('countrySelect').value;
-    
-    if(!age || !country || !window.selectedLookingFor) {
-        tg.showAlert("⚠️ Please fill in all fields.");
-        return;
-    }
-
-    const telegramUser = tg.initDataUnsafe?.user || {};
-    user.registered = true;
-    user.credits = 50;
-    user.data = {
-        firstName: telegramUser.first_name,
-        age: age,
-        country: country
-    };
-
-    localStorage.setItem('syncHeartsUser', JSON.stringify(user));
-
-    // Notify Bot about new user
-    // Note: We don't use sendData here because we don't want to close the app yet.
-    // Instead, we just update local UI and fetch agents.
-    
-    tg.showAlert("🎉 Account Created!\n💰 50 Credits Added.");
-    updateCreditDisplay();
-    showScreen('screenAgents');
-});
-
-function updateCreditDisplay() {
-    document.querySelectorAll('#creditCount').forEach(el => el.innerText = user.credits);
-}
-
-// ====================================================================
-// NAVIGATION
-// ====================================================================
 
 function setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
     
     navItems.forEach(item => {
         item.addEventListener('click', () => {
+            // Visual Active State
             navItems.forEach(n => n.classList.remove('active'));
             item.classList.add('active');
 
             const tab = item.dataset.tab;
+
             if (tab === 'browse') {
+                showScreen('screenAgents');
                 window.scrollTo({top: 0, behavior: 'smooth'});
             } 
             else if (tab === 'wallet') {
-                tg.showConfirm("💰 Open Wallet to buy coins?", (ok) => {
+                tg.showConfirm("💰 Go to Wallet in chat?", (ok) => {
                     if(ok) tg.sendData(JSON.stringify({ action: 'open_wallet' }));
                 });
             }
-            else if (tab === 'chat') {
-                // Just close app to go back to chat
-                tg.close();
+            else if (tab === 'chats') {
+                 // Usually just closes app to show chat history
+                 tg.close();
+            }
+            else if (tab === 'profile') {
+                tg.showAlert(`👤 User Profile:\n\nName: ${user.data.firstName || 'User'}\nCredits: ${user.credits}`);
             }
         });
     });
-}
+            } 
