@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Check Persistence
 function loadUserState() {
+    // Optional: Uncomment the next line ONCE, deploy, open app, then comment it out to wipe everyone's phone cache.
+    // localStorage.removeItem('syncHeartsUser'); 
+
     const savedUser = localStorage.getItem('syncHeartsUser');
     
     if (savedUser) {
@@ -88,11 +91,13 @@ const btnCompleteReg = document.getElementById('btnCompleteReg');
 if(btnCompleteReg) {
     btnCompleteReg.addEventListener('click', () => {
         // 1. Validate
+        const name = document.getElementById('nameInput').value; // NEW
         const age = document.getElementById('ageInput').value;
         const country = document.getElementById('countrySelect').value;
+        const photoFile = document.getElementById('photoInput').files[0];
         const lookingFor = window.selectedLookingFor;
 
-        if(!age || !country || !lookingFor) {
+        if(!age || !name || !country || !lookingFor) {
             tg.showAlert("⚠️ Please fill in all fields.");
             return;
         }
@@ -102,6 +107,23 @@ if(btnCompleteReg) {
             return;
         }
 
+        // 1. Upload Photo First (if selected)
+        let photoUrl = '';
+        if (photoFile) {
+            const formData = new FormData();
+            formData.append('photo', photoFile);
+            
+            try {
+                // Change button text to show loading
+                btnCompleteReg.innerText = "Uploading...";
+                const res = await fetch(`${API_BASE_URL}/api/upload_client`, { method: 'POST', body: formData });
+                const json = await res.json();
+                photoUrl = json.url;
+            } catch (e) {
+                console.error("Upload failed", e);
+            }
+        } 
+        
         // 2. Create User State
         const telegramUser = tg.initDataUnsafe?.user || {};
         user.registered = true;
@@ -111,6 +133,7 @@ if(btnCompleteReg) {
             firstName: telegramUser.first_name || 'User',
             age: age,
             country: country,
+            photo: photo URL, 
             lookingFor: lookingFor
         };
 
