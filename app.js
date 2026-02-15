@@ -8,10 +8,7 @@ tg.expand(); // Full screen
 tg.enableClosingConfirmation();
 
 // IMPORTANT: Replace this with your actual Render/Server URL when deployed
-// For local testing, keep localhost.
-// const API_BASE_URL = 'http://localhost:8080';
-const API_BASE_URL = 'https://telegram-b75x.onrender.com'; 
-// const API_BASE_URL = 'https://your-app-name.onrender.com';
+const API_BASE_URL = 'https://telegram-b75x.onrender.com'; // Update if needed
 
 // Global State
 let user = {
@@ -26,25 +23,25 @@ let user = {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadUserState();
-    loadAgents(); // NEW: Fetch from API
+    loadAgents(); // Fetch from API
     setupNavigation();
 });
 
 // Check Persistence
 function loadUserState() {
-    // Optional: Uncomment the next line ONCE, deploy, open app, then comment it out to wipe everyone's phone cache.
-    // localStorage.removeItem('syncHeartsUser'); 
+    // Optional: Uncomment the next line ONCE to wipe everyone's cached registration
+    // localStorage.removeItem('syncHeartsUser');
 
     const savedUser = localStorage.getItem('syncHeartsUser');
-    
+
     if (savedUser) {
         user = JSON.parse(savedUser);
         console.log("Loaded user:", user);
-        
+
         // Update UI
         const nameDisplay = document.getElementById('loginUsername');
         if (nameDisplay) nameDisplay.innerText = user.data.firstName || 'User';
-        
+
         updateCreditDisplay();
         showScreen('screenLogin');
     } else {
@@ -58,73 +55,95 @@ function showScreen(screenId) {
     // Hide all screens
     document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.bottom-nav').forEach(el => el.classList.add('hidden'));
-    
+
     // Show target
     const target = document.getElementById(screenId);
-    if(target) target.classList.remove('hidden');
+    if (target) target.classList.remove('hidden');
 
     // Show Nav bar only on main screens (Agents list)
-    if(screenId === 'screenAgents') {
+    if (screenId === 'screenAgents') {
         document.getElementById('mainNav').classList.remove('hidden');
     }
-}
-
-// "Welcome Back" Button Logic
-const btnAutoLogin = document.getElementById('btnAutoLogin');
-if(btnAutoLogin) {
-    btnAutoLogin.addEventListener('click', () => {
-        showScreen('screenAgents');
-    });
 }
 
 // Update Header Credits
 function updateCreditDisplay() {
     const display = document.getElementById('creditDisplay');
-    if(display) display.innerText = user.credits;
+    if (display) display.innerText = user.credits;
+}
+
+// "Welcome Back" Button Logic
+const btnAutoLogin = document.getElementById('btnAutoLogin');
+if (btnAutoLogin) {
+    btnAutoLogin.addEventListener('click', () => {
+        showScreen('screenAgents');
+    });
 }
 
 // ====================================================================
 // 3. REGISTRATION LOGIC
 // ====================================================================
 
+// Photo preview helper (called from inline onchange)
+window.previewPhoto = function() {
+    const fileInput = document.getElementById('photoInput');
+    const previewText = document.getElementById('photoPreviewText');
+    if (fileInput.files.length > 0) {
+        previewText.style.display = 'block';
+        previewText.innerText = '✅ ' + fileInput.files[0].name;
+    } else {
+        previewText.style.display = 'none';
+    }
+};
+
+// Gender selection helper (already defined inline, but we keep a global reference)
+window.selectedLookingFor = null;
+
 const btnCompleteReg = document.getElementById('btnCompleteReg');
-if(btnCompleteReg) {
-    btnCompleteReg.addEventListener('click', () => {
-        // 1. Validate
-        const name = document.getElementById('nameInput').value; // NEW
+if (btnCompleteReg) {
+    btnCompleteReg.addEventListener('click', async () => {   // make async
+        // 1. Validate inputs
+        const name = document.getElementById('nameInput').value;
         const age = document.getElementById('ageInput').value;
         const country = document.getElementById('countrySelect').value;
         const photoFile = document.getElementById('photoInput').files[0];
         const lookingFor = window.selectedLookingFor;
 
-        if(!age || !name || !country || !lookingFor) {
+        if (!age || !name || !country || !lookingFor) {
             tg.showAlert("⚠️ Please fill in all fields.");
             return;
         }
 
-        if(age < 18) {
+        if (parseInt(age) < 18) {
             tg.showAlert("⛔ You must be 18+.");
             return;
         }
 
-        // 1. Upload Photo First (if selected)
+        // 2. Upload Photo if selected
         let photoUrl = '';
         if (photoFile) {
             const formData = new FormData();
             formData.append('photo', photoFile);
-            
+
             try {
                 // Change button text to show loading
                 btnCompleteReg.innerText = "Uploading...";
-                const res = await fetch(`${API_BASE_URL}/api/upload_client`, { method: 'POST', body: formData });
+                const res = await fetch(`${API_BASE_URL}/api/upload_client`, {
+                    method: 'POST',
+                    body: formData
+                });
                 const json = await res.json();
-                photoUrl = json.url;
+                photoUrl = json.url;  // e.g. "https://.../uploads/client-123456.jpg"
             } catch (e) {
                 console.error("Upload failed", e);
+                tg.showAlert("Photo upload failed, but you can continue without it.");
+                // Continue without photo
+            } finally {
+                btnCompleteReg.innerText = "✅ Create & Claim Coins";
             }
-        } 
-        
-        // 2. Create User State
+        }
+
+        // 3. Create User State
         const telegramUser = tg.initDataUnsafe?.user || {};
         user.registered = true;
         user.credits = 50; // Visual only, backend verifies this
@@ -133,22 +152,28 @@ if(btnCompleteReg) {
             firstName: telegramUser.first_name || 'User',
             age: age,
             country: country,
-            photo: photo URL, 
+            photo_url: photoUrl,       // important: matches backend expectation
             lookingFor: lookingFor
         };
 
-        // 3. Save & Sync
+        // 4. Save to localStorage
         localStorage.setItem('syncHeartsUser', JSON.stringify(user));
-        
-        // Send to Bot (Triggers DB update + 50 credits)
+
+        // 5. Send data to bot (this will close the WebApp in Telegram)
         tg.sendData(JSON.stringify({
             action: 'register_new_user',
-            user_data: user.data
+            user_data: {
+                age: age,
+                country: country,
+                photo_url: photoUrl
+            }
         }));
 
-        // Note: sendData closes the app usually. If testing in browser:
-        updateCreditDisplay();
-        showScreen('screenAgents');
+        // 6. For browser testing, manually show the agents screen
+        if (window.location.protocol !== 'https:' || window.location.hostname === 'localhost') {
+            updateCreditDisplay();
+            showScreen('screenAgents');
+        }
     });
 }
 
@@ -158,15 +183,13 @@ if(btnCompleteReg) {
 
 async function loadAgents() {
     const container = document.getElementById('agentGridContainer');
-    
+
     try {
-        // Fetch from your Node.js bot
         const response = await fetch(`${API_BASE_URL}/api/agents`);
         if (!response.ok) throw new Error("API Error");
-        
+
         const agents = await response.json();
         renderAgentGrid(agents);
-
     } catch (e) {
         console.error("Load failed:", e);
         container.innerHTML = `
@@ -182,7 +205,7 @@ function renderAgentGrid(agents) {
     const container = document.getElementById('agentGridContainer');
     container.innerHTML = ''; // Clear loader
 
-    if(agents.length === 0) {
+    if (agents.length === 0) {
         container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:20px;">No models available yet.</div>`;
         return;
     }
@@ -190,7 +213,7 @@ function renderAgentGrid(agents) {
     agents.forEach(agent => {
         const card = document.createElement('div');
         card.className = 'agent-card fade-in';
-        
+
         card.innerHTML = `
             <div class="img-wrapper">
                 <img src="${agent.photo}" alt="${agent.name}" onerror="this.src='https://placehold.co/400x500?text=No+Image'">
@@ -225,20 +248,20 @@ window.selectAgent = function(id, name) {
     // Haptic Feedback
     tg.HapticFeedback.impactOccurred('medium');
 
-    // Send selection to Bot
+    // Send selection to bot
     const payload = {
         action: 'select_agent',
         agent_id: id,
         agent_name: name
     };
-    
+
     // This sends data to bot.js and closes the WebApp
     tg.sendData(JSON.stringify(payload));
 };
 
 function setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
-    
+
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             // Visual Active State
@@ -249,20 +272,22 @@ function setupNavigation() {
 
             if (tab === 'browse') {
                 showScreen('screenAgents');
-                window.scrollTo({top: 0, behavior: 'smooth'});
-            } 
-            else if (tab === 'wallet') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (tab === 'wallet') {
                 tg.showConfirm("💰 Go to Wallet in chat?", (ok) => {
-                    if(ok) tg.sendData(JSON.stringify({ action: 'open_wallet' }));
+                    if (ok) tg.sendData(JSON.stringify({ action: 'open_wallet' }));
                 });
-            }
-            else if (tab === 'chats') {
-                 // Usually just closes app to show chat history
-                 tg.close();
-            }
-            else if (tab === 'profile') {
+            } else if (tab === 'chats') {
+                // Usually just closes app to show chat history
+                tg.close();
+            } else if (tab === 'profile') {
                 tg.showAlert(`👤 User Profile:\n\nName: ${user.data.firstName || 'User'}\nCredits: ${user.credits}`);
             }
         });
     });
-            } 
+}
+
+// ====================================================================
+// 6. EXPOSE FUNCTIONS FOR INLINE EVENT HANDLERS (if any)
+// ====================================================================
+// (selectAgent and previewPhoto are already attached to window)
