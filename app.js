@@ -1,3 +1,4 @@
+```javascript
 // ====================================================================
 // APP.JS - Sync Hearts Agency Frontend Logic (Dynamic API Edition)
 // ====================================================================
@@ -18,35 +19,50 @@ let user = {
 };
 
 // ====================================================================
-// 2. LIFECYCLE & NAVIGATION
+// 2. LIFECYCLE & NAVIGATION (with backend verification)
 // ====================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadUserState();
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadUserState(); // Now async
     loadAgents(); // Fetch from API
     setupNavigation();
 });
 
-// Check Persistence
-function loadUserState() {
-    // Optional: Uncomment the next line ONCE to wipe everyone's cached registration
-    // localStorage.removeItem('syncHeartsUser');
-
+// Check Persistence with Backend Verification
+async function loadUserState() {
     const savedUser = localStorage.getItem('syncHeartsUser');
 
-    if (savedUser) {
-        user = JSON.parse(savedUser);
-        console.log("Loaded user:", user);
+    // If no local user, show registration
+    if (!savedUser) {
+        showScreen('screenRegister');
+        return;
+    }
 
-        // Update UI
+    user = JSON.parse(savedUser);
+    const telegramUser = tg.initDataUnsafe?.user || {};
+
+    // Verify that this user still exists in the database
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/user/${telegramUser.id}`);
+        const data = await response.json();
+
+        if (!data.exists) {
+            // User missing in DB → wipe local storage and force re‑registration
+            localStorage.removeItem('syncHeartsUser');
+            showScreen('screenRegister');
+            return;
+        }
+
+        // User exists, proceed with login screen
         const nameDisplay = document.getElementById('loginUsername');
         if (nameDisplay) nameDisplay.innerText = user.data.firstName || 'User';
 
         updateCreditDisplay();
         showScreen('screenLogin');
-    } else {
-        // New User
-        showScreen('screenRegister');
+    } catch (error) {
+        console.error("Error checking user existence:", error);
+        // On error, fall back to login (or registration if you prefer)
+        showScreen('screenLogin');
     }
 }
 
@@ -81,7 +97,7 @@ if (btnAutoLogin) {
 }
 
 // ====================================================================
-// 3. REGISTRATION LOGIC
+// 3. REGISTRATION LOGIC (with localStorage cleanup)
 // ====================================================================
 
 // Photo preview helper (called from inline onchange)
@@ -101,7 +117,7 @@ window.selectedLookingFor = null;
 
 const btnCompleteReg = document.getElementById('btnCompleteReg');
 if (btnCompleteReg) {
-    btnCompleteReg.addEventListener('click', async () => {   // make async
+    btnCompleteReg.addEventListener('click', async () => {
         // 1. Validate inputs
         const name = document.getElementById('nameInput').value;
         const age = document.getElementById('ageInput').value;
@@ -143,7 +159,9 @@ if (btnCompleteReg) {
             }
         }
 
-        // 3. Create User State
+        // 3. Create User State (clear old data first)
+        localStorage.removeItem('syncHeartsUser'); // Ensure no stale data
+
         const telegramUser = tg.initDataUnsafe?.user || {};
         user.registered = true;
         user.credits = 50; // Visual only, backend verifies this
@@ -291,3 +309,4 @@ function setupNavigation() {
 // 6. EXPOSE FUNCTIONS FOR INLINE EVENT HANDLERS (if any)
 // ====================================================================
 // (selectAgent and previewPhoto are already attached to window)
+```
