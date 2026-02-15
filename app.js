@@ -9,7 +9,8 @@ tg.enableClosingConfirmation();
 
 // IMPORTANT: Replace this with your actual Render/Server URL when deployed
 // For local testing, keep localhost.
-const API_BASE_URL = 'http://localhost:8080'; 
+// const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'https://telegram-b75x.onrender.com'; 
 // const API_BASE_URL = 'https://your-app-name.onrender.com';
 
 // Global State
